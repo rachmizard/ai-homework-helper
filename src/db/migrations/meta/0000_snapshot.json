@@ -1,5 +1,5 @@
 {
-  "id": "95d0cb23-53da-4fb5-be30-71b11225782f",
+  "id": "0982258a-c011-4605-b8fc-3f197509c348",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -167,7 +167,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -227,15 +227,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "chat_sessions_user_id_users_clerk_id_fk": {
-          "name": "chat_sessions_user_id_users_clerk_id_fk",
+        "chat_sessions_user_id_users_id_fk": {
+          "name": "chat_sessions_user_id_users_id_fk",
           "tableFrom": "chat_sessions",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "clerk_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -260,7 +260,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -330,15 +330,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "user_progress_user_id_users_clerk_id_fk": {
-          "name": "user_progress_user_id_users_clerk_id_fk",
+        "user_progress_user_id_users_id_fk": {
+          "name": "user_progress_user_id_users_id_fk",
           "tableFrom": "user_progress",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "clerk_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"

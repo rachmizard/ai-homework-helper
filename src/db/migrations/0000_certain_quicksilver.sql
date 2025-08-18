@@ -25,7 +25,7 @@ CREATE TABLE "chat_messages" (
 --> statement-breakpoint
 CREATE TABLE "chat_sessions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" varchar NOT NULL,
+	"user_id" uuid NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"subject" "subject" NOT NULL,
 	"input_method" "input_method" NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE "chat_sessions" (
 --> statement-breakpoint
 CREATE TABLE "user_progress" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" varchar NOT NULL,
+	"user_id" uuid NOT NULL,
 	"subject" "subject" NOT NULL,
 	"tasks_attempted" varchar(10) DEFAULT '0' NOT NULL,
 	"hints_used" varchar(10) DEFAULT '0' NOT NULL,
@@ -51,5 +51,5 @@ CREATE TABLE "user_progress" (
 );
 --> statement-breakpoint
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_session_id_chat_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."chat_sessions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_user_id_users_clerk_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("clerk_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "user_progress" ADD CONSTRAINT "user_progress_user_id_users_clerk_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("clerk_id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_progress" ADD CONSTRAINT "user_progress_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;

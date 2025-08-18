@@ -24,8 +24,8 @@ export const inputMethodEnum = pgEnum("input_method", ["photo", "text"]);
 // Chat sessions table - represents a homework session
 export const chatSessions = pgTable("chat_sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: varchar("user_id")
-    .references(() => users.clerkId, { onDelete: "cascade" })
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   title: varchar("title", { length: 255 }).notNull(), // Generated title for the session
   subject: subjectEnum("subject").notNull(),
@@ -53,8 +53,8 @@ export const chatMessages = pgTable("chat_messages", {
 // User progress tracking - aggregate stats per user
 export const userProgress = pgTable("user_progress", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: varchar("user_id")
-    .references(() => users.clerkId, { onDelete: "cascade" })
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   subject: subjectEnum("subject").notNull(),
   tasksAttempted: varchar("tasks_attempted", { length: 10 })
