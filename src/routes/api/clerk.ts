@@ -3,13 +3,14 @@ import { createServerFileRoute } from "@tanstack/react-start/server";
 import { db } from "../../db";
 import { users } from "../../db/schema/users";
 import { eq } from "drizzle-orm";
+import { env } from "~/lib/env-config";
 
 // Webhook handler for Clerk events
 export const ServerRoute = createServerFileRoute("/api/clerk").methods({
   POST: async ({ request }) => {
     try {
       // Get the webhook secret from environment
-      const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+      const webhookSecret = env.CLERK_WEBHOOK_SECRET;
 
       if (!webhookSecret) {
         console.error("Missing CLERK_WEBHOOK_SECRET environment variable");
