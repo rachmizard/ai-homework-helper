@@ -1,14 +1,28 @@
-import * as React from "react";
-import { Link } from "@tanstack/react-router";
-import { Button } from "~/components/ui/button";
-import { ThemeToggle } from "~/components/theme-toggle";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "~/components/ui/sheet";
+  SignInButton,
+  UserButton,
+  SignedIn,
+  SignedOut,
+} from "@clerk/tanstack-react-start";
+import { Link } from "@tanstack/react-router";
+import {
+  BarChart3,
+  BookOpen,
+  Brain,
+  Calculator,
+  FileText,
+  Home,
+  Menu,
+  Microscope,
+  PenTool,
+  Sparkles,
+  Trophy,
+  User,
+} from "lucide-react";
+import * as React from "react";
+import { ThemeToggle } from "~/components/theme-toggle";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,26 +31,14 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
-import { Badge } from "~/components/ui/badge";
 import {
-  Menu,
-  X,
-  BookOpen,
-  Brain,
-  Calculator,
-  Microscope,
-  PenTool,
-  FileText,
-  Trophy,
-  User,
-  Settings,
-  LogOut,
-  Sparkles,
-  Home,
-  BarChart3,
-} from "lucide-react";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "~/components/ui/sheet";
 import { cn } from "~/lib/utils";
-import { SignInButton } from "@clerk/tanstack-react-start";
 
 const subjects = [
   {
@@ -197,12 +199,25 @@ export function Navbar({ className }: NavbarProps) {
 
             {/* User Menu - Desktop */}
             <div className="hidden md:flex items-center space-x-2">
-              <SignInButton mode="modal">
-                <Button variant="outline" size="sm">
-                  <User className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-              </SignInButton>
+              <SignedIn>
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8",
+                      userButtonPopoverCard: "shadow-lg border",
+                      userButtonPopoverActions: "space-y-1",
+                    },
+                  }}
+                />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button variant="outline" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </SignInButton>
+              </SignedOut>
             </div>
 
             {/* Mobile Menu */}
@@ -222,7 +237,7 @@ export function Navbar({ className }: NavbarProps) {
                     </span>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 space-y-6">
+                <div className="mt-6 space-y-6 p-4">
                   {/* Mobile Navigation Links */}
                   <div className="space-y-3">
                     <Link
@@ -294,19 +309,36 @@ export function Navbar({ className }: NavbarProps) {
 
                   {/* Mobile User Actions */}
                   <div className="space-y-3 pt-6 border-t">
-                    <SignInButton>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        Sign In
+                    <SignedIn>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Account
+                        </span>
+                        <UserButton
+                          appearance={{
+                            elements: {
+                              avatarBox: "w-8 h-8",
+                              userButtonPopoverCard: "shadow-lg border",
+                            },
+                          }}
+                        />
+                      </div>
+                    </SignedIn>
+                    <SignedOut>
+                      <SignInButton>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
+                          <User className="h-4 w-4 mr-2" />
+                          Sign In
+                        </Button>
+                      </SignInButton>
+                      <Button className="w-full justify-start">
+                        <Trophy className="h-4 w-4 mr-2" />
+                        Get Started
                       </Button>
-                    </SignInButton>
-                    <Button className="w-full justify-start">
-                      <Trophy className="h-4 w-4 mr-2" />
-                      Get Started
-                    </Button>
+                    </SignedOut>
                   </div>
                 </div>
               </SheetContent>

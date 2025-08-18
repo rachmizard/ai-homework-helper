@@ -1,35 +1,11 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { getAuth } from "@clerk/tanstack-react-start/server";
-import { getWebRequest } from "@tanstack/react-start/server";
 import { useUser } from "@clerk/tanstack-react-start";
+import { createFileRoute } from "@tanstack/react-router";
 
-// Server function to check authentication
-const authStateFn = createServerFn({ method: "GET" }).handler(async () => {
-  const request = getWebRequest();
-  if (!request) throw new Error("No request found");
-
-  const { userId } = await getAuth(request);
-
-  if (!userId) {
-    throw redirect({
-      to: "/sign-in",
-    });
-  }
-
-  return { userId };
-});
-
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/_authenticatedLayout/dashboard")({
   component: Dashboard,
-  beforeLoad: async () => await authStateFn(),
-  loader: async ({ context }) => {
-    return { userId: context.userId };
-  },
 });
 
 function Dashboard() {
-  const { userId } = Route.useLoaderData();
   const { user } = useUser();
 
   return (
@@ -42,7 +18,7 @@ function Dashboard() {
         </p>
         <div className="mt-4 space-y-2">
           <p>
-            <strong>User ID:</strong> {userId}
+            <strong>User ID:</strong> {user?.id}
           </p>
           {user && (
             <>
