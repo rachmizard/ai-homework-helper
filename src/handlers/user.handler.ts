@@ -12,7 +12,7 @@ export const getUser = createServerFn({ method: "GET" }).handler(
     }
 
     const userDb = await db.query.users.findFirst({
-      where: eq(users.id, userId),
+      where: eq(users.clerkId, userId),
     });
 
     return userDb ?? null;

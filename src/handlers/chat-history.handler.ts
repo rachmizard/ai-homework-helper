@@ -31,7 +31,7 @@ export const createChatSession = createServerFn({ method: "POST" })
         .insert(chatSessions)
         .values({
           ...data,
-          userId: user.id,
+          userId: user.clerkId,
         })
         .returning();
 
@@ -55,7 +55,7 @@ export const getUserChatSessions = createServerFn({ method: "GET" }).handler(
       const sessions = await db
         .select()
         .from(chatSessions)
-        .where(eq(chatSessions.userId, user.id))
+        .where(eq(chatSessions.userId, user.clerkId))
         .orderBy(desc(chatSessions.updatedAt));
 
       return sessions;
@@ -82,7 +82,10 @@ export const getChatSessionWithMessages = createServerFn({ method: "GET" })
         .select()
         .from(chatSessions)
         .where(
-          and(eq(chatSessions.id, sessionId), eq(chatSessions.userId, user.id))
+          and(
+            eq(chatSessions.id, sessionId),
+            eq(chatSessions.userId, user.clerkId)
+          )
         );
 
       if (!session) {
@@ -124,7 +127,7 @@ export const addChatMessage = createServerFn({ method: "POST" })
         .where(
           and(
             eq(chatSessions.id, data.sessionId),
-            eq(chatSessions.userId, user.id)
+            eq(chatSessions.userId, user.clerkId)
           )
         );
 
@@ -176,7 +179,7 @@ export const updateUserProgress = createServerFn({ method: "POST" })
         .from(userProgress)
         .where(
           and(
-            eq(userProgress.userId, user.id),
+            eq(userProgress.userId, user.clerkId),
             eq(userProgress.subject, data.subject)
           )
         );
@@ -226,7 +229,7 @@ export const updateUserProgress = createServerFn({ method: "POST" })
       } else {
         // Create new progress record
         const newProgress: typeof userProgress.$inferInsert = {
-          userId: user.id,
+          userId: user.clerkId,
           subject: data.subject,
           tasksAttempted: data.action === "task" ? "1" : "0",
           hintsUsed: data.action === "hint" ? "1" : "0",
@@ -261,7 +264,7 @@ export const getUserProgressSummary = createServerFn({ method: "GET" }).handler(
       const progressRecords = await db
         .select()
         .from(userProgress)
-        .where(eq(userProgress.userId, user.id));
+        .where(eq(userProgress.userId, user.clerkId));
 
       const summary: UserProgressSummary = {
         totalTasks: 0,
@@ -322,7 +325,7 @@ export const updateSessionTitle = createServerFn({ method: "POST" })
         .where(
           and(
             eq(chatSessions.id, data.sessionId),
-            eq(chatSessions.userId, user.id)
+            eq(chatSessions.userId, user.clerkId)
           )
         )
         .returning();
@@ -356,7 +359,10 @@ export const endChatSession = createServerFn({ method: "POST" })
           updatedAt: new Date(),
         })
         .where(
-          and(eq(chatSessions.id, sessionId), eq(chatSessions.userId, user.id))
+          and(
+            eq(chatSessions.id, sessionId),
+            eq(chatSessions.userId, user.clerkId)
+          )
         )
         .returning();
 

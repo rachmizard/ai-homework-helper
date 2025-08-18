@@ -1,13 +1,15 @@
 CREATE TYPE "public"."input_method" AS ENUM('photo', 'text');--> statement-breakpoint
 CREATE TYPE "public"."subject" AS ENUM('math', 'science', 'writing', 'summary');--> statement-breakpoint
 CREATE TABLE "users" (
-	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"clerk_id" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"first_name" varchar(255),
 	"last_name" varchar(255),
 	"profile_image" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "users_clerk_id_unique" UNIQUE("clerk_id"),
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -49,5 +51,5 @@ CREATE TABLE "user_progress" (
 );
 --> statement-breakpoint
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_session_id_chat_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."chat_sessions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "user_progress" ADD CONSTRAINT "user_progress_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_user_id_users_clerk_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("clerk_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_progress" ADD CONSTRAINT "user_progress_user_id_users_clerk_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("clerk_id") ON DELETE cascade ON UPDATE no action;

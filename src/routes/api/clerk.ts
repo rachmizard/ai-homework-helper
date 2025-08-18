@@ -89,7 +89,7 @@ export const ServerRoute = createServerFileRoute("/api/clerk").methods({
 async function handleUserCreated(data: any) {
   try {
     const user = {
-      id: data.id,
+      clerkId: data.id,
       email: data.email_addresses[0]?.email_address || "",
       firstName: data.first_name || null,
       lastName: data.last_name || null,
@@ -114,7 +114,7 @@ async function handleUserUpdated(data: any) {
       updatedAt: new Date(),
     };
 
-    await db.update(users).set(updateData).where(eq(users.id, data.id));
+    await db.update(users).set(updateData).where(eq(users.clerkId, data.id));
 
     console.log(`User updated: ${data.id}`);
   } catch (error) {
@@ -125,7 +125,7 @@ async function handleUserUpdated(data: any) {
 // Handle user deletion
 async function handleUserDeleted(data: any) {
   try {
-    await db.delete(users).where(eq(users.id, data.id));
+    await db.delete(users).where(eq(users.clerkId, data.id));
     console.log(`User deleted: ${data.id}`);
   } catch (error) {
     console.error("Error deleting user:", error);
