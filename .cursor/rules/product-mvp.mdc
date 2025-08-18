@@ -1,0 +1,228 @@
+---
+alwaysApply: false
+---
+Product Requirements Document (PRD): AI Homework Helper App (Web-Based MVP)
+1. Overview
+The AI Homework Helper App is a web-based tool designed to empower middle and high school students (ages 12–18) with homework support across math, science, writing, and summary tasks. Students can upload photos 📸 or type/paste text ⌨️ to receive strategic hints, concept explanations, practice tasks, and post-test quizzes to reinforce learning. The app avoids providing full answers to ensure it’s teacher-approved, focusing on guiding students to understand and solve tasks independently. Built for accessibility on any browser, it features a dark-mode, emoji-friendly interface to feel modern and engaging. The MVP prioritizes simplicity, speed (<3-second responses), and light gamification to drive daily use. 🎯
+Goal: Enable students to input a task → get a hint 💡, learn the concept 🧠, practice 🔄, and test knowledge ✅ in a fun, web-based platform.
+
+2. Feature Breakdown & Prioritization
+Below, each feature is detailed with its functionality, technical requirements, and prioritization rationale to guide development focus. Priorities are ranked as High, Medium, or Low based on user value, feasibility, and MVP impact.
+2.1 Flexible Input: Photo Upload or Text Entry 📸⌨️
+
+Function: Students upload a photo of a homework task (e.g., math equation, essay prompt, article) or type/paste text directly in the browser for processing.
+Requirements:
+Photo Upload: Drag-and-drop or "Choose File" button for JPEG/PNG images (<5MB). Use client-side OCR (e.g., Tesseract.js) or server-side API (e.g., Google Cloud Vision) to extract text/equations.
+Text Entry: Text box for pasting or typing prompts, articles, or questions (max 2,000 characters).
+Auto-detect subject: Math/science via equations (e.g., “2x + 3 = 7”); writing via prompts (e.g., “Write an essay on…”); summary via long text.
+Display extracted/entered text for user confirmation.
+Process inputs in <3 seconds with 80%+ OCR accuracy for handwritten/typed text.
+Support Chrome, Safari, Firefox, Edge (latest versions) on desktop/mobile.
+
+
+Technical Needs:
+Frontend: HTML5/CSS/JavaScript (React for responsive UI).
+Backend: Node.js or Python (Flask) for API handling; OCR integration (Tesseract.js for client-side or Google Cloud Vision for server-side).
+NLP: Basic subject detection using regex for equations or keyword analysis for writing/summary.
+
+
+Priority: High
+Rationale: Input is the entry point for all user interactions. Without reliable photo/text input, other features can’t function. Photo upload is critical for math/science (core subjects), and text entry enables writing/summary tasks. Fast, accurate input sets the “magical” tone and drives adoption.
+
+
+Development Notes: Start with client-side OCR (Tesseract.js) to minimize costs, but plan for a server-side API (e.g., Google Cloud Vision) for better accuracy. Subject detection can use simple rules (e.g., equations → math; “essay” → writing) to keep MVP lean.
+
+2.2 Hint Mode 💡
+
+Function: Provide a concise, subject-specific hint to guide students without giving full answers, tailored to math, science, writing, or summary tasks.
+Requirements:
+Math/Science: E.g., for “Solve: 2x + 3 = 7”, hint: “Try isolating x by subtracting 3 from both sides.”
+Writing: E.g., for “Essay on climate change”, hint: “Start with a surprising fact, then outline 3 points: causes, effects, solutions.”
+Summary: E.g., for an article, hint: “Focus on the main thesis and 2 key points—aim for 1/4 the original length.”
+Hints are 1–2 sentences, avoiding direct solutions.
+Tone: Friendly, e.g., “This one’s tricky but fun! Here’s a hint 🎯.”
+Generate hints in <2 seconds after input confirmation.
+
+
+Technical Needs:
+AI: Lightweight NLP/math parser (e.g., fine-tuned GPT or rule-based logic for math; keyword-based templates for writing/summary).
+Backend: API endpoint to process input and return hint.
+Frontend: Display hint in a clean, emoji-enhanced card.
+
+
+Priority: High
+Rationale: Hints are the core value proposition, guiding students across subjects without cheating. They ensure the app feels helpful and teacher-approved, driving engagement. This feature is critical for all task types and aligns with the learning-focused mission.
+
+
+Development Notes: Use rule-based templates for math/science hints (e.g., “isolate variable” for equations) and pre-defined patterns for writing/summary to minimize AI complexity. Consider xAI’s Grok API for advanced NLP if budget allows (details at https://x.ai/api).
+
+2.3 Concept Breakdown 🧠
+
+Function: Explain the underlying concept or technique for the task to deepen understanding.
+Requirements:
+Math/Science: E.g., “This is a linear equation. Use inverse operations to isolate the variable, like balancing a scale! ⚖️”
+Writing: E.g., “A thesis statement summarizes your essay’s main point in one sentence. It’s the heart of your argument! 💡”
+Summary: E.g., “Summarizing means capturing key ideas in fewer words. Look for topic sentences and skip minor details. ✂️”
+Explanations are 2–3 sentences with analogies/emojis.
+Display in <2 seconds after user selection.
+
+
+Technical Needs:
+AI: Pre-built concept database (e.g., “linear equations” → explanation) or lightweight NLP for dynamic generation.
+Frontend: Show explanation in a visually distinct section (e.g., collapsible card).
+
+
+Priority: Medium
+Rationale: Concept explanations enhance learning by teaching why a solution works, but they’re secondary to hints, which provide immediate help. Students may skip this feature if in a rush, so it’s not as critical as input or hints but still adds significant value for retention.
+
+
+Development Notes: Use a static database of common concepts (e.g., 50 math/science topics, 10 writing/summary techniques) to reduce AI dependency. Map inputs to concepts via keywords or equation types.
+
+2.4 Practice Mode 🔄
+
+Function: Generate similar tasks for students to practice and reinforce skills.
+Requirements:
+Math/Science: E.g., Original: “Simplify: 3(2x - 5)”; Practice: “Simplify: 4(3x - 2).”
+Writing: E.g., Original: “Essay on pollution”; Practice: “Outline an essay on recycling—list 3 key points.”
+Summary: E.g., Provide a 150-word passage to summarize in 50 words.
+Offer 1–3 practice tasks with a “Check Feedback” option (e.g., for writing: “Your outline is solid—add more evidence!”).
+Tone: Fun, e.g., “Let’s practice this skill! Ready? 🚀”
+Generate tasks in <2 seconds.
+
+
+Technical Needs:
+AI: Template-based task generator (e.g., tweak numbers for math; swap topics for writing).
+Backend: API to generate and validate practice tasks.
+Frontend: Input field for answers; feedback display.
+
+
+Priority: Medium
+Rationale: Practice mode reinforces learning and adds value beyond homework help, but it’s less critical than input and hints, which are the app’s core. Students may not always use practice tasks, but it’s key for engagement and skill-building.
+
+
+Development Notes: Use simple templates (e.g., change coefficients for math; swap keywords for writing prompts) to keep generation lightweight. Feedback can be rule-based (e.g., check math answers exactly; flag missing outline points).
+
+2.5 Post-Test Mode ✅
+
+Function: Offer a quick 3–5 question quiz to recap knowledge after a task.
+Requirements:
+Generate multiple-choice or short-answer questions:
+Math: “What’s the next step in 3x = 9? A) Add 3 B) Divide by 3.”
+Writing: “What’s a hook? A) Conclusion B) Attention-grabber.”
+Summary: “What’s the main idea of this passage? A) Details B) Thesis.”
+
+
+Provide instant feedback: “Correct! 🎉” or “Close—review the concept 🧠.”
+Tie to the original task; generate in <2 seconds.
+Optional: Save scores to progress tracker.
+
+
+Technical Needs:
+AI: Rule-based quiz generator (e.g., map math steps to options; use writing/summary templates).
+Frontend: Simple quiz UI with radio buttons/text input and feedback pop-ups.
+
+
+Priority: Low
+Rationale: Post-tests solidify learning and add gamification, but they’re less essential than input, hints, or practice. Students may skip quizzes under time pressure, but this feature boosts retention and engagement for dedicated users.
+
+
+Development Notes: Use a small question bank tied to concepts (e.g., 5 questions per topic) to minimize AI load. Feedback can be static (e.g., correct/incorrect) for simplicity.
+
+2.6 Progress Tracker 📊
+
+Function: Track student activity across subjects to encourage daily use.
+Requirements:
+Log: Tasks attempted, hints used, practice tasks completed, quizzes passed (e.g., “You’ve tackled 2 math problems and 1 quiz! 🥳”).
+Display a simple dashboard with subject breakdowns.
+Store data in browser local storage (no login required).
+Accessible via a “Progress” tab.
+
+
+Technical Needs:
+Frontend: React component for dashboard (e.g., bar chart or text stats).
+Storage: Browser localStorage API for persistence.
+
+
+Priority: Low
+Rationale: Progress tracking adds stickiness through gamification, but it’s not core to solving homework. It’s a nice-to-have that encourages return visits but can be simplified (e.g., basic stats) to avoid delaying MVP launch.
+
+
+Development Notes: Use localStorage to store JSON with task counts; display as a simple list or chart. Avoid complex metrics in MVP.
+
+
+3. User Interface (UI) & User Experience (UX)
+
+No Login Required: Instant access via browser.
+Dark Mode & Emoji-Friendly: Toggleable dark/light mode; emojis for a teen-friendly vibe.
+Flow:
+Landing page: “Upload Photo 📸” or “Type Task ⌨️” buttons.
+Confirm input text.
+Buttons: “Get a Hint” 💡, “Learn Concept” 🧠, “Practice” 🔄, “Take Quiz” ✅.
+Progress tab 📊 for stats.
+
+
+Tone: Friendly, e.g., “This essay prompt looks awesome! Here’s a hint 🎯.”
+Performance: <3-second responses for all actions; responsive design for mobile/desktop.
+
+
+4. Technical Requirements
+
+Platform: Web app (React, Tailwind CSS for styling, JSX for components).
+Input Tech: Tesseract.js (client-side OCR) or Google Cloud Vision (server-side); basic NLP for subject detection.
+AI: Rule-based templates for hints, concepts, practice, and quizzes; optional xAI Grok API for advanced NLP (https://x.ai/api).
+Offline: Limited offline mode (cached hints/concepts) via service workers.
+Privacy: Local storage; anonymized server-side processing.
+Scalability: Handle 10,000 monthly users; optimize API calls.
+
+
+5. Success Metrics
+
+Adoption: 2,000 unique users in 3 months.
+Engagement: 4 tasks/quizzes per user per week.
+Retention: 40% return rate within 7 days.
+User Satisfaction: 4.5+ stars in feedback.
+
+
+6. Constraints & Assumptions
+
+Constraints:
+Web-only MVP; no native apps.
+Limited to math, science, writing, summary tasks.
+Budget for OCR/NLP APIs.
+
+
+Assumptions:
+Students use modern browsers on phones/laptops.
+Teachers approve non-solution-based help.
+Emojis and friendly tone boost engagement.
+
+
+
+
+7. Future Considerations
+
+Add native apps post-MVP.
+Expand subjects (e.g., history, languages).
+Enhance quizzes with adaptive difficulty.
+Leverage xAI Grok API for smarter features (https://x.ai/api).
+
+
+8. Example User Flow
+
+Visit site, upload photo of “Solve: 4x - 5 = 11” or type it. 📸⌨️
+Confirm extracted text.
+Select “Hint” 💡: “Add 5 to both sides to isolate the term with x.”
+“Concept” 🧠: “This is a linear equation. Solve|||||||||Isolate x to solve! ⚖️”
+“Practice” 🔄: “Solve: 3x + 2 = 8.”
+“Quiz” ✅: “What’s the first step in 3x = 6? A) Divide by 3 B) Add 3.” Feedback: “Correct! 🎉”
+Progress: “2 math tasks, 1 quiz done! 🥳”
+
+
+9. Development Prioritization Summary
+
+Flexible Input (High): Build this first to enable all other features. Focus on robust OCR and subject detection.
+Hint Mode (High): Core learning feature; develop alongside input for immediate user value.
+Concept Breakdown (Medium): Add after hints; use a static database for efficiency.
+Practice Mode (Medium): Build after core features; keep generation simple with templates.
+Post-Test Mode (Low): Add last; use a small question bank to minimize complexity.
+Progress Tracker (Low): Implement as a final touch; simple local storage-based stats.

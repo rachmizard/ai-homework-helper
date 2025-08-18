@@ -18,6 +18,8 @@ import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/handlers/seo";
 import { Toaster } from "~/components/ui/sonner";
+import { ThemeProvider } from "~/components/theme-provider";
+import { ThemeToggle } from "~/components/theme-toggle";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -72,72 +74,66 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html>
-        <head>
-          <HeadContent />
-        </head>
-        <body>
-          <div className="p-2 flex gap-2 text-lg items-center">
-            <Link
-              to="/"
-              activeProps={{
-                className: "font-bold",
-              }}
-              activeOptions={{ exact: true }}
-            >
-              Home
-            </Link>{" "}
-            <SignedIn>
+      <ThemeProvider defaultTheme="system" storageKey="homework-helper-theme">
+        <html>
+          <head>
+            <HeadContent />
+          </head>
+          <body>
+            <div className="p-2 flex gap-2 text-lg items-center">
               <Link
-                to="/dashboard"
+                to="/"
                 activeProps={{
                   className: "font-bold",
                 }}
+                activeOptions={{ exact: true }}
               >
-                Dashboard
+                Home
               </Link>{" "}
-            </SignedIn>
-            <Link
-              // @ts-expect-error
-              to="/this-route-does-not-exist"
-              activeProps={{
-                className: "font-bold",
-              }}
-            >
-              This Route Does Not Exist
-            </Link>
-            <div className="ml-auto flex items-center gap-2">
-              <SignedOut>
-                <Link
-                  to="/sign-in"
-                  activeProps={{
-                    className: "font-bold",
-                  }}
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/sign-up"
-                  activeProps={{
-                    className: "font-bold",
-                  }}
-                >
-                  Sign Up
-                </Link>
-              </SignedOut>
               <SignedIn>
-                <UserButton />
+                <Link
+                  to="/dashboard"
+                  activeProps={{
+                    className: "font-bold",
+                  }}
+                >
+                  Dashboard
+                </Link>{" "}
               </SignedIn>
+              <div className="ml-auto flex items-center gap-2">
+                <ThemeToggle />
+                <SignedOut>
+                  <Link
+                    to="/sign-in"
+                    activeProps={{
+                      className: "font-bold",
+                    }}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/sign-up"
+                    activeProps={{
+                      className: "font-bold",
+                    }}
+                  >
+                    Sign Up
+                  </Link>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+              </div>
             </div>
-          </div>
-          <hr />
-          {children}
-          <Toaster />
+            <hr />
+            {children}
+            <Toaster />
 
-          <TanStackRouterDevtools position="bottom-right" />
-          <Scripts />
-        </body>
-      </html>
+            <TanStackRouterDevtools position="bottom-right" />
+            <Scripts />
+          </body>
+        </html>
+      </ThemeProvider>
     </ClerkProvider>
   );
 }
