@@ -8,11 +8,11 @@ import {
   FileText,
   Home,
   Microscope,
-  PenTool,
-  Sparkles,
-  Settings,
   Monitor,
   Moon,
+  PenTool,
+  Settings,
+  Sparkles,
   Sun,
 } from "lucide-react";
 import { useTheme } from "~/components/theme-provider";
@@ -38,7 +38,6 @@ import {
   SidebarMenuItem,
   Sidebar as SidebarPrimitive,
   SidebarSeparator,
-  useSidebar,
 } from "~/components/ui/sidebar";
 
 const subjects = [
@@ -132,18 +131,20 @@ function SettingsDropdown() {
 }
 
 export function AppSidebar() {
-  const { isMobile } = useSidebar();
   return (
-    <SidebarPrimitive collapsible={isMobile ? "offcanvas" : "icon"}>
+    <SidebarPrimitive collapsible="icon">
       <SidebarHeader>
-        <Link to="/dashboard" className="flex items-center space-x-3 group p-2">
+        <Link
+          to="/dashboard"
+          className="flex items-center space-x-3 group p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:space-x-0"
+        >
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-lg blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
             <div className="relative bg-background rounded-lg p-2">
               <Brain className="h-6 w-6 text-primary" />
             </div>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-lg font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
               AI Homework
             </span>
