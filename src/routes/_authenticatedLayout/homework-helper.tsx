@@ -339,59 +339,6 @@ function HomeworkHelper() {
     }
   };
 
-  // Response generators (same as original)
-  const getHintResponse = (subject: Subject) => {
-    const hints: Record<string, string> = {
-      math: "💡 Try isolating x by subtracting 3 from both sides first. What do you get? 🤔",
-      science:
-        "💡 Remember the scientific method: Observation → Hypothesis → Experiment → Conclusion! 🔬",
-      writing:
-        "💡 Start with a hook that grabs attention! Try a surprising fact or a thought-provoking question. ✍️",
-      summary:
-        "💡 Look for the topic sentence in each paragraph - they usually contain the main ideas! 📝",
-    };
-    return hints[subject];
-  };
-
-  const getConceptResponse = (subject: Subject) => {
-    const concepts: Record<string, string> = {
-      math: "🧠 This is a linear equation! Think of it like a balance scale - whatever you do to one side, you must do to the other to keep it balanced. ⚖️\n\nThe goal is to get x by itself on one side!",
-      science:
-        "🧠 The scientific method is a systematic way to understand the world. It's like being a detective - you observe clues, make educated guesses, and test them! 🔍",
-      writing:
-        "🧠 A strong essay has three parts: Introduction (with thesis), Body (with evidence), and Conclusion. Think of it as telling a story with a beginning, middle, and end! 📖",
-      summary:
-        "🧠 Summarizing means capturing the BIG ideas in fewer words. Skip the details and examples - focus on what the author is really trying to say! ✂️",
-    };
-    return concepts[subject];
-  };
-
-  const getPracticeResponse = (subject: Subject) => {
-    const practice: Record<string, string> = {
-      math: "🔄 Let's practice! Try this similar problem:\n\nSolve: 4x - 5 = 11\n\nRemember the steps we just learned! You got this! 💪",
-      science:
-        "🔄 Practice time! Design a simple experiment:\n\nQuestion: Does music affect plant growth?\nNow create your hypothesis and experimental design! 🌱",
-      writing:
-        "🔄 Your turn! Write an introduction paragraph for:\n\n'The importance of protecting our oceans'\n\nDon't forget your hook and thesis statement! 🌊",
-      summary:
-        "🔄 Practice summarizing this:\n\n'The Amazon rainforest produces 20% of Earth's oxygen, houses millions of species, and influences global weather patterns. However, deforestation threatens this vital ecosystem.'\n\nSummarize in one sentence! 🌳",
-    };
-    return practice[subject];
-  };
-
-  const getQuizResponse = (subject: Subject) => {
-    const quiz: Record<string, string> = {
-      math: "✅ Quick Quiz!\n\nWhat's the first step in solving 3x + 9 = 15?\n\nA) Divide by 3\nB) Subtract 9 from both sides\nC) Add 9 to both sides\nD) Multiply by 3\n\nThink carefully! 🤓",
-      science:
-        "✅ Quiz Time!\n\nWhat comes after forming a hypothesis?\n\nA) Write conclusion\nB) Make observation\nC) Conduct experiment\nD) Ask a question\n\nYou know this! 🧪",
-      writing:
-        "✅ Quick Check!\n\nWhat makes a good hook?\n\nA) Long explanation\nB) Boring fact\nC) Surprising statement\nD) Dictionary definition\n\nPick the best one! ✨",
-      summary:
-        "✅ Test yourself!\n\nWhen summarizing, you should:\n\nA) Include every detail\nB) Add your opinions\nC) Focus on main ideas\nD) Make it longer\n\nChoose wisely! 📚",
-    };
-    return quiz[subject];
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
       {/* Hero Section */}
