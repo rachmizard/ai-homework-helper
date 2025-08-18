@@ -13,10 +13,11 @@ import {
 } from "~/db/schema";
 import { getUser } from "./user.handler";
 import { authMiddleware } from "./middlewares/auth.middleware";
+import { zodValidator } from "@tanstack/zod-adapter";
 
 // Create a new chat session
 export const createChatSession = createServerFn({ method: "POST" })
-  .validator(insertChatSessionSchema)
+  .validator(zodValidator(insertChatSessionSchema))
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     const user = await getUser();
@@ -108,7 +109,7 @@ export const getChatSessionWithMessages = createServerFn({ method: "GET" })
 
 // Add a message to a chat session
 export const addChatMessage = createServerFn({ method: "POST" })
-  .validator(insertChatMessageSchema)
+  .validator(zodValidator(insertChatMessageSchema))
   .middleware([authMiddleware])
   .handler(async ({ data }): Promise<ChatMessage> => {
     const user = await getUser();
