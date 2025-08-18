@@ -1,9 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  Brain,
+  Camera,
+  CheckCircle2,
+  RefreshCw,
+  Send,
+  Sparkles,
+  Type,
+} from "lucide-react";
 import * as React from "react";
-import { FileUpload } from "~/components/file-upload";
+import { toast } from "sonner";
+import Aurora from "~/components/backgrounds/Aurora/Aurora";
 import { ChatInterface, ChatMessage } from "~/components/chat-interface";
+import { FileUpload } from "~/components/file-upload";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -11,21 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { toast } from "sonner";
-import {
-  Sparkles,
-  Brain,
-  RefreshCw,
-  CheckCircle2,
-  Send,
-  Type,
-  Camera,
-  BookOpen,
-  Zap,
-  Target,
-  Trophy,
-} from "lucide-react";
+import { Textarea } from "~/components/ui/textarea";
 
 export const Route = createFileRoute("/")({
   component: HomeworkHelper,
@@ -180,51 +177,32 @@ function HomeworkHelper() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 opacity-30"></div>
-
       {/* Hero Section */}
-      <div className="container mx-auto px-4 pt-8 pb-4 relative z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
-              AI Homework Helper
-            </span>
-            <span className="ml-3">🚀</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Get instant hints, learn concepts, practice problems, and test your
-            knowledge! No direct answers - just smart guidance to help you
-            learn. 🧠✨
-          </p>
+      <div className="relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute top-0 left-0 right-0 bottom-0 opacity-20 z-0">
+          <Aurora
+            colorStops={["#9333ea", "#ec4899", "#3b82f6"]}
+            amplitude={1.5}
+            blend={0.8}
+            speed={0.5}
+          />
         </div>
 
-        {/* Features */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <FeatureCard
-            icon={Zap}
-            title="Instant Help"
-            description="< 3 seconds"
-            index={0}
-          />
-          <FeatureCard
-            icon={BookOpen}
-            title="All Subjects"
-            description="Math, Science & More"
-            index={1}
-          />
-          <FeatureCard
-            icon={Target}
-            title="Smart Hints"
-            description="Learn, Don't Copy"
-            index={2}
-          />
-          <FeatureCard
-            icon={Trophy}
-            title="Track Progress"
-            description="Level Up Daily"
-            index={3}
-          />
+        <div className="container mx-auto px-4 pt-16 pb-4 relative z-10">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
+                AI Homework Helper
+              </span>
+              <span className="ml-3">🚀</span>
+            </h1>
+            <p className="text-md md:text-lg text-foreground max-w-2xl mx-auto leading-relaxed">
+              Get instant hints, learn concepts, practice problems, and test
+              your knowledge! No direct answers - just smart guidance to help
+              you learn. 🧠✨
+            </p>
+          </div>
         </div>
       </div>
 

@@ -15,11 +15,11 @@ import {
 } from "@clerk/tanstack-react-start";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
+import { Navbar } from "~/components/navbar";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/handlers/seo";
 import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/theme-provider";
-import { ThemeToggle } from "~/components/theme-toggle";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -80,52 +80,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             <HeadContent />
           </head>
           <body>
-            <div className="p-2 flex gap-2 text-lg items-center">
-              <Link
-                to="/"
-                activeProps={{
-                  className: "font-bold",
-                }}
-                activeOptions={{ exact: true }}
-              >
-                Home
-              </Link>{" "}
-              <SignedIn>
-                <Link
-                  to="/dashboard"
-                  activeProps={{
-                    className: "font-bold",
-                  }}
-                >
-                  Dashboard
-                </Link>{" "}
-              </SignedIn>
-              <div className="ml-auto flex items-center gap-2">
-                <ThemeToggle />
-                <SignedOut>
-                  <Link
-                    to="/sign-in"
-                    activeProps={{
-                      className: "font-bold",
-                    }}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/sign-up"
-                    activeProps={{
-                      className: "font-bold",
-                    }}
-                  >
-                    Sign Up
-                  </Link>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-              </div>
-            </div>
-            <hr />
+            <Navbar />
             {children}
             <Toaster />
 
