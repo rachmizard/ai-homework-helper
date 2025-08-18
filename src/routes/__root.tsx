@@ -17,6 +17,7 @@ import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/handlers/seo";
+import { Toaster } from "~/components/ui/sonner";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -155,6 +156,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           </div>
           <hr />
           {children}
+          <Toaster />
+
           <TanStackRouterDevtools position="bottom-right" />
           <Scripts />
         </body>
