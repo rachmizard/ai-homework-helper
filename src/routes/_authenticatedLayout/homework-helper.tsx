@@ -43,7 +43,7 @@ import {
   useUpdateSessionTitle,
   useEndChatSession,
 } from "~/hooks/use-chat-history";
-import type { ChatSession } from "~/db/schema";
+import { useUser } from "~/hooks/use-user";
 
 export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
   component: HomeworkHelper,
@@ -53,7 +53,7 @@ type Subject = "math" | "science" | "writing" | "summary";
 type Mode = "hint" | "concept" | "practice" | "quiz";
 
 function HomeworkHelper() {
-  const { userId } = useAuth();
+  const user = useUser();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [textInput, setTextInput] = React.useState("");
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
@@ -148,9 +148,11 @@ function HomeworkHelper() {
 
     const title = generateSessionTitle(originalInput);
 
+    if (!user || !user.data) return;
+
     try {
       const session = await createSessionMutation.mutateAsync({
-        userId: userId!,
+        userId: user.data.id,
         title,
         subject: detectedSubject,
         inputMethod,

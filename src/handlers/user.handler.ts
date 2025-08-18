@@ -4,17 +4,17 @@ import { getWebRequest } from "@tanstack/react-start/server";
 import { eq } from "drizzle-orm";
 import { db, User, users } from "~/db";
 
-export const getUser = createServerFn({ method: "GET" }).handler(
-  async (): Promise<User | null> => {
+export const getUser = createServerFn({ method: "GET" })
+  .validator((clerkId?: string) => clerkId ?? null)
+  .handler(async ({ data: clerkId }): Promise<User | null> => {
     const { userId } = await getAuth(getWebRequest()!);
     if (!userId) {
-      return null;
+      throw new Error("Unauthorized");
     }
 
     const userDb = await db.query.users.findFirst({
-      where: eq(users.clerkId, userId),
+      where: eq(users.clerkId, clerkId || userId),
     });
 
     return userDb ?? null;
-  }
-);
+  });
