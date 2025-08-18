@@ -1,0 +1,245 @@
+---
+description: This is a guide for the UI of the AI Homework Helper App
+alwaysApply: false
+---
+
+# AI Homework Helper UI Guide
+
+## 🎉 UI Implementation Complete!
+
+I've created a modern, teen-friendly landing page for the AI Homework Helper App with a chat-like interface to reduce user friction. Here's what has been implemented:
+
+## ✨ Features Implemented
+
+### 1. **Modern Landing Page**
+- Hero section with gradient text and clear value proposition
+- Feature cards highlighting key benefits (Instant Help, All Subjects, Smart Hints, Track Progress)
+- Emoji-rich, engaging design that appeals to students
+
+### 2. **Chat-Like Interface**
+- Clean conversation view with user and assistant messages
+- Real-time message updates with smooth scrolling
+- Timestamp display for each message
+- Empty state with helpful prompt
+
+### 3. **Flexible Input Methods**
+- **Photo Upload**: Drag-and-drop or click to upload homework photos
+  - File validation (JPEG/PNG, max 5MB)
+  - Visual preview with file info
+  - Remove option
+- **Text Input**: Textarea for typing or pasting questions
+  - Enter to submit (Shift+Enter for new line)
+  - Character-friendly interface
+
+### 4. **Smart Subject Detection**
+- Automatic detection of Math, Science, Writing, or Summary tasks
+- Visual badge showing detected subject
+- Simple regex-based detection (ready for AI enhancement)
+
+### 5. **Action Buttons**
+- Get Hint 💡 - Provides strategic guidance
+- Learn Concept 🧠 - Explains underlying principles
+- Practice 🔄 - Generates similar problems
+- Take Quiz ✅ - Tests understanding
+
+### 6. **Dark Mode Support**
+- System-aware theme detection
+- Manual toggle in navigation
+- Smooth transitions between themes
+- Persistent preference storage
+
+### 7. **Responsive Design**
+- Mobile-friendly layout
+- Grid system that adapts to screen size
+- Touch-friendly buttons and interactions
+
+## 🎨 UI Components Created
+
+1. **ThemeProvider** - Context for dark/light mode management
+2. **ThemeToggle** - Sun/Moon icon toggle button
+3. **FileUpload** - Drag-and-drop file upload component
+4. **ChatInterface** - Message display with auto-scroll
+5. **FeatureCard** - Reusable card for feature highlights
+
+## 🚀 Current State
+
+The UI is fully functional with mock responses. When you select a file or type a question:
+1. Subject is automatically detected
+2. Action buttons appear
+3. Clicking any action button shows a subject-appropriate response
+4. Toast notifications confirm actions
+
+## 🔧 Next Steps for Full Implementation
+
+### 1. **OCR Integration**
+```javascript
+// Replace mock OCR with real implementation
+// Options: Tesseract.js (client-side) or Google Cloud Vision API
+const extractedText = await performOCR(file);
+```
+
+### 2. **AI/LLM Integration**
+```javascript
+// Connect to AI service (e.g., xAI Grok API)
+const response = await generateHint(question, subject);
+```
+
+### 3. **Backend API**
+- Create endpoints for:
+  - `/api/extract-text` - OCR processing
+  - `/api/generate-hint` - AI hint generation
+  - `/api/generate-concept` - Concept explanations
+  - `/api/generate-practice` - Practice problems
+  - `/api/generate-quiz` - Quiz questions
+
+### 4. **Progress Tracking**
+- Implement localStorage or database storage
+- Track completed tasks, hints used, quiz scores
+- Add progress visualization
+
+### 5. **Authentication Integration**
+- Optional: Use existing Clerk auth for personalized progress
+- Save user preferences and history
+
+## 🌐 Access the App
+
+The development server is running at: **http://localhost:3000**
+
+## 📱 Testing Different Scenarios
+
+1. **Math Problem**: Type "Solve: 2x + 3 = 7"
+2. **Writing Task**: Type "Write an essay about climate change"
+3. **Science Question**: Type "Explain photosynthesis"
+4. **Summary Task**: Type "Summarize this article about..."
+
+Each will trigger different subject detection and appropriate responses!
+
+## 🎯 Design Decisions
+
+1. **No Login Required**: Instant access aligns with PRD requirements
+2. **Chat Interface**: Familiar UX pattern for teens
+3. **Emoji Usage**: Makes the app feel fun and approachable
+4. **Quick Actions**: All features accessible within 2 clicks
+5. **Visual Feedback**: Loading states, toasts, and transitions
+
+The UI is ready for LLM/OCR integration whenever you're ready to implement the backend functionality!
+# AI Homework Helper UI Guide
+
+## 🎉 UI Implementation Complete!
+
+I've created a modern, teen-friendly landing page for the AI Homework Helper App with a chat-like interface to reduce user friction. Here's what has been implemented:
+
+## ✨ Features Implemented
+
+### 1. **Modern Landing Page**
+- Hero section with gradient text and clear value proposition
+- Feature cards highlighting key benefits (Instant Help, All Subjects, Smart Hints, Track Progress)
+- Emoji-rich, engaging design that appeals to students
+
+### 2. **Chat-Like Interface**
+- Clean conversation view with user and assistant messages
+- Real-time message updates with smooth scrolling
+- Timestamp display for each message
+- Empty state with helpful prompt
+
+### 3. **Flexible Input Methods**
+- **Photo Upload**: Drag-and-drop or click to upload homework photos
+  - File validation (JPEG/PNG, max 5MB)
+  - Visual preview with file info
+  - Remove option
+- **Text Input**: Textarea for typing or pasting questions
+  - Enter to submit (Shift+Enter for new line)
+  - Character-friendly interface
+
+### 4. **Smart Subject Detection**
+- Automatic detection of Math, Science, Writing, or Summary tasks
+- Visual badge showing detected subject
+- Simple regex-based detection (ready for AI enhancement)
+
+### 5. **Action Buttons**
+- Get Hint 💡 - Provides strategic guidance
+- Learn Concept 🧠 - Explains underlying principles
+- Practice 🔄 - Generates similar problems
+- Take Quiz ✅ - Tests understanding
+
+### 6. **Dark Mode Support**
+- System-aware theme detection
+- Manual toggle in navigation
+- Smooth transitions between themes
+- Persistent preference storage
+
+### 7. **Responsive Design**
+- Mobile-friendly layout
+- Grid system that adapts to screen size
+- Touch-friendly buttons and interactions
+
+## 🎨 UI Components Created
+
+1. **ThemeProvider** - Context for dark/light mode management
+2. **ThemeToggle** - Sun/Moon icon toggle button
+3. **FileUpload** - Drag-and-drop file upload component
+4. **ChatInterface** - Message display with auto-scroll
+5. **FeatureCard** - Reusable card for feature highlights
+
+## 🚀 Current State
+
+The UI is fully functional with mock responses. When you select a file or type a question:
+1. Subject is automatically detected
+2. Action buttons appear
+3. Clicking any action button shows a subject-appropriate response
+4. Toast notifications confirm actions
+
+## 🔧 Next Steps for Full Implementation
+
+### 1. **OCR Integration**
+```javascript
+// Replace mock OCR with real implementation
+// Options: Tesseract.js (client-side) or Google Cloud Vision API
+const extractedText = await performOCR(file);
+```
+
+### 2. **AI/LLM Integration**
+```javascript
+// Connect to AI service (e.g., xAI Grok API)
+const response = await generateHint(question, subject);
+```
+
+### 3. **Backend API**
+- Create endpoints for:
+  - `/api/extract-text` - OCR processing
+  - `/api/generate-hint` - AI hint generation
+  - `/api/generate-concept` - Concept explanations
+  - `/api/generate-practice` - Practice problems
+  - `/api/generate-quiz` - Quiz questions
+
+### 4. **Progress Tracking**
+- Implement localStorage or database storage
+- Track completed tasks, hints used, quiz scores
+- Add progress visualization
+
+### 5. **Authentication Integration**
+- Optional: Use existing Clerk auth for personalized progress
+- Save user preferences and history
+
+## 🌐 Access the App
+
+The development server is running at: **http://localhost:3000**
+
+## 📱 Testing Different Scenarios
+
+1. **Math Problem**: Type "Solve: 2x + 3 = 7"
+2. **Writing Task**: Type "Write an essay about climate change"
+3. **Science Question**: Type "Explain photosynthesis"
+4. **Summary Task**: Type "Summarize this article about..."
+
+Each will trigger different subject detection and appropriate responses!
+
+## 🎯 Design Decisions
+
+1. **No Login Required**: Instant access aligns with PRD requirements
+2. **Chat Interface**: Familiar UX pattern for teens
+3. **Emoji Usage**: Makes the app feel fun and approachable
+4. **Quick Actions**: All features accessible within 2 clicks
+5. **Visual Feedback**: Loading states, toasts, and transitions
+
+The UI is ready for LLM/OCR integration whenever you're ready to implement the backend functionality!

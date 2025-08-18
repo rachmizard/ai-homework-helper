@@ -1,3 +1,7 @@
+---
+description: This clerk authentication setup guide
+alwaysApply: false
+---
 # Clerk Authentication Setup Guide
 
 This project has been configured with Clerk authentication for TanStack Start. Follow these steps to complete the setup:
