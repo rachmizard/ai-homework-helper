@@ -17,6 +17,8 @@ Create a `.env` file in the root of your project with the following variables:
 # Clerk Authentication Keys
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
 CLERK_SECRET_KEY=sk_test_YOUR_SECRET_KEY_HERE
+# Get this from Webhooks section in Clerk Dashboard
+CLERK_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET_HERE
 ```
 
 Replace the placeholder values with your actual keys from the Clerk Dashboard.
@@ -95,8 +97,57 @@ To protect additional routes, use the same pattern as the dashboard:
 2. **"User not authenticated" on protected routes**: Make sure cookies are enabled and you're signed in
 3. **Styling issues**: Clerk components come with default styles that can be customized via the appearance prop
 
+## 5. Webhook Integration
+
+This project includes a webhook handler at `/api/clerk` that automatically syncs user data with your database when users are created, updated, or deleted in Clerk.
+
+### Setting up Webhooks
+
+1. **Configure the Webhook Secret**: Add the `CLERK_WEBHOOK_SECRET` to your `.env` file (already included above)
+
+2. **Create a Webhook in Clerk Dashboard**:
+   - Go to your Clerk Dashboard
+   - Navigate to **Webhooks** in the sidebar
+   - Click **Create Webhook**
+   - Set the **Endpoint URL** to: `https://yourdomain.com/api/clerk`
+   - Select the following events:
+     - `user.created`
+     - `user.updated`
+     - `user.deleted`
+   - Copy the **Signing Secret** and add it to your `.env` file as `CLERK_WEBHOOK_SECRET`
+
+### What the Webhook Handler Does
+
+The webhook handler automatically:
+- **Creates users** in your database when they sign up via Clerk
+- **Updates user information** when they modify their profile
+- **Removes users** from your database when they delete their account
+
+### Database Schema
+
+The webhook works with the following user schema:
+```typescript
+{
+  id: uuid (auto-generated)
+  clerkId: string (unique, from Clerk)
+  email: string (unique)
+  firstName: string (optional)
+  lastName: string (optional)
+  profileImage: string (optional)
+  createdAt: timestamp
+  updatedAt: timestamp
+}
+```
+
+### Testing the Webhook
+
+You can test the webhook endpoint:
+- **GET** `http://localhost:3000/api/clerk` - Health check
+- **POST** `http://localhost:3000/api/clerk` - Webhook handler (requires proper Clerk signature)
+
 ## Learn More
 
 - [Clerk Documentation](https://clerk.com/docs)
 - [TanStack Start + Clerk Guide](https://clerk.com/docs/quickstarts/tanstack-react-start)
 - [Clerk Components Reference](https://clerk.com/docs/components/overview)
+- [Clerk Webhooks Documentation](https://clerk.com/docs/webhooks/overview)
