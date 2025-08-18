@@ -8,7 +8,6 @@ import { getWebRequest } from "@tanstack/react-start/server";
 import * as React from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
-import { Navbar } from "~/components/navbar";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
 import { seo } from "~/handlers/seo";
@@ -82,13 +81,12 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <ThemeProvider defaultTheme="system" storageKey="homework-helper-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="homework-helper-theme">
         <html>
           <head>
             <HeadContent />
           </head>
           <body>
-            <Navbar />
             {children}
             <Toaster />
 

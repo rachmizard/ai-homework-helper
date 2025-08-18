@@ -24,7 +24,7 @@ import {
 } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_guestLayout/")({
   component: HomeworkHelper,
 });
 
@@ -349,29 +349,5 @@ function HomeworkHelper() {
         </div>
       </div>
     </div>
-  );
-}
-
-interface FeatureCardProps {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  index: number;
-}
-
-function FeatureCard({
-  icon: Icon,
-  title,
-  description,
-  index,
-}: FeatureCardProps) {
-  return (
-    <Card className="text-center p-4 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
-      <Icon className="h-8 w-8 mx-auto mb-2 text-primary group-hover:scale-110 transition-transform duration-300" />
-      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
-        {title}
-      </h3>
-      <p className="text-xs text-muted-foreground">{description}</p>
-    </Card>
   );
 }

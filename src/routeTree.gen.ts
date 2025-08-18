@@ -11,33 +11,38 @@
 import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as GuestLayoutRouteImport } from './routes/_guestLayout'
 import { Route as AuthenticatedLayoutRouteImport } from './routes/_authenticatedLayout'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuestLayoutIndexRouteImport } from './routes/_guestLayout/index'
+import { Route as GuestLayoutSignUpRouteImport } from './routes/_guestLayout/sign-up'
+import { Route as GuestLayoutSignInRouteImport } from './routes/_guestLayout/sign-in'
 import { Route as AuthenticatedLayoutDashboardRouteImport } from './routes/_authenticatedLayout/dashboard'
 import { ServerRoute as ApiClerkServerRouteImport } from './routes/api/clerk'
 
 const rootServerRouteImport = createServerRootRoute()
 
-const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
+const GuestLayoutRoute = GuestLayoutRouteImport.update({
+  id: '/_guestLayout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedLayoutRoute = AuthenticatedLayoutRouteImport.update({
   id: '/_authenticatedLayout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const GuestLayoutIndexRoute = GuestLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GuestLayoutRoute,
+} as any)
+const GuestLayoutSignUpRoute = GuestLayoutSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => GuestLayoutRoute,
+} as any)
+const GuestLayoutSignInRoute = GuestLayoutSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => GuestLayoutRoute,
 } as any)
 const AuthenticatedLayoutDashboardRoute =
   AuthenticatedLayoutDashboardRouteImport.update({
@@ -52,44 +57,44 @@ const ApiClerkServerRoute = ApiClerkServerRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
   '/dashboard': typeof AuthenticatedLayoutDashboardRoute
+  '/sign-in': typeof GuestLayoutSignInRoute
+  '/sign-up': typeof GuestLayoutSignUpRoute
+  '/': typeof GuestLayoutIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
   '/dashboard': typeof AuthenticatedLayoutDashboardRoute
+  '/sign-in': typeof GuestLayoutSignInRoute
+  '/sign-up': typeof GuestLayoutSignUpRoute
+  '/': typeof GuestLayoutIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_authenticatedLayout': typeof AuthenticatedLayoutRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/_guestLayout': typeof GuestLayoutRouteWithChildren
   '/_authenticatedLayout/dashboard': typeof AuthenticatedLayoutDashboardRoute
+  '/_guestLayout/sign-in': typeof GuestLayoutSignInRoute
+  '/_guestLayout/sign-up': typeof GuestLayoutSignUpRoute
+  '/_guestLayout/': typeof GuestLayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/sign-up' | '/dashboard'
+  fullPaths: '/dashboard' | '/sign-in' | '/sign-up' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in' | '/sign-up' | '/dashboard'
+  to: '/dashboard' | '/sign-in' | '/sign-up' | '/'
   id:
     | '__root__'
-    | '/'
     | '/_authenticatedLayout'
-    | '/sign-in'
-    | '/sign-up'
+    | '/_guestLayout'
     | '/_authenticatedLayout/dashboard'
+    | '/_guestLayout/sign-in'
+    | '/_guestLayout/sign-up'
+    | '/_guestLayout/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthenticatedLayoutRoute: typeof AuthenticatedLayoutRouteWithChildren
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
+  GuestLayoutRoute: typeof GuestLayoutRouteWithChildren
 }
 export interface FileServerRoutesByFullPath {
   '/api/clerk': typeof ApiClerkServerRoute
@@ -115,18 +120,11 @@ export interface RootServerRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
+    '/_guestLayout': {
+      id: '/_guestLayout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof GuestLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticatedLayout': {
@@ -136,12 +134,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_guestLayout/': {
+      id: '/_guestLayout/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GuestLayoutIndexRouteImport
+      parentRoute: typeof GuestLayoutRoute
+    }
+    '/_guestLayout/sign-up': {
+      id: '/_guestLayout/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof GuestLayoutSignUpRouteImport
+      parentRoute: typeof GuestLayoutRoute
+    }
+    '/_guestLayout/sign-in': {
+      id: '/_guestLayout/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof GuestLayoutSignInRouteImport
+      parentRoute: typeof GuestLayoutRoute
     }
     '/_authenticatedLayout/dashboard': {
       id: '/_authenticatedLayout/dashboard'
@@ -175,11 +187,25 @@ const AuthenticatedLayoutRouteChildren: AuthenticatedLayoutRouteChildren = {
 const AuthenticatedLayoutRouteWithChildren =
   AuthenticatedLayoutRoute._addFileChildren(AuthenticatedLayoutRouteChildren)
 
+interface GuestLayoutRouteChildren {
+  GuestLayoutSignInRoute: typeof GuestLayoutSignInRoute
+  GuestLayoutSignUpRoute: typeof GuestLayoutSignUpRoute
+  GuestLayoutIndexRoute: typeof GuestLayoutIndexRoute
+}
+
+const GuestLayoutRouteChildren: GuestLayoutRouteChildren = {
+  GuestLayoutSignInRoute: GuestLayoutSignInRoute,
+  GuestLayoutSignUpRoute: GuestLayoutSignUpRoute,
+  GuestLayoutIndexRoute: GuestLayoutIndexRoute,
+}
+
+const GuestLayoutRouteWithChildren = GuestLayoutRoute._addFileChildren(
+  GuestLayoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthenticatedLayoutRoute: AuthenticatedLayoutRouteWithChildren,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
+  GuestLayoutRoute: GuestLayoutRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
