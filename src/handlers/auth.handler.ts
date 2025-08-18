@@ -1,13 +1,10 @@
-import { getAuth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
-import { getWebRequest } from "@tanstack/react-start/server";
+import { authMiddleware } from "./middlewares/auth.middleware";
 
-export const fetchClerkAuth = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { userId } = await getAuth(getWebRequest()!);
-
+export const fetchClerkAuth = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
     return {
-      userId: userId ?? null,
+      userId: context.userId ?? null,
     };
-  }
-);
+  });

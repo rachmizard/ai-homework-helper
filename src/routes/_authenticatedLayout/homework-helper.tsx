@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
-import { useAuth } from "@clerk/tanstack-react-start";
 import Aurora from "~/components/backgrounds/Aurora/Aurora";
 import { ChatInterface, ChatMessage } from "~/components/chat-interface";
 import { FileUpload } from "~/components/file-upload";

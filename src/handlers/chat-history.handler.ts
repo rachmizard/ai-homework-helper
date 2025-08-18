@@ -1,29 +1,28 @@
-import { getAuth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
-import { getWebRequest } from "@tanstack/react-start/server";
-import { eq, desc, and } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "~/db";
 import {
-  chatSessions,
   chatMessages,
-  userProgress,
-  type ChatSessionWithMessages,
-  type NewChatMessage,
-  type ChatMessage,
-  type UserProgressSummary,
-  insertChatSessionSchema,
+  chatSessions,
   insertChatMessageSchema,
+  insertChatSessionSchema,
+  userProgress,
+  type ChatMessage,
+  type ChatSessionWithMessages,
+  type UserProgressSummary,
 } from "~/db/schema";
 import { getUser } from "./user.handler";
+import { authMiddleware } from "./middlewares/auth.middleware";
 
 // Create a new chat session
 export const createChatSession = createServerFn({ method: "POST" })
   .validator(insertChatSessionSchema)
+  .middleware([authMiddleware])
   .handler(async ({ data }) => {
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
@@ -48,7 +47,7 @@ export const getUserChatSessions = createServerFn({ method: "GET" }).handler(
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
@@ -69,11 +68,12 @@ export const getUserChatSessions = createServerFn({ method: "GET" }).handler(
 // Get a specific chat session with messages
 export const getChatSessionWithMessages = createServerFn({ method: "GET" })
   .validator((sessionId: string) => sessionId)
+  .middleware([authMiddleware])
   .handler(async ({ data: sessionId }): Promise<ChatSessionWithMessages> => {
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
@@ -109,11 +109,12 @@ export const getChatSessionWithMessages = createServerFn({ method: "GET" })
 // Add a message to a chat session
 export const addChatMessage = createServerFn({ method: "POST" })
   .validator(insertChatMessageSchema)
+  .middleware([authMiddleware])
   .handler(async ({ data }): Promise<ChatMessage> => {
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
@@ -162,11 +163,12 @@ export const updateUserProgress = createServerFn({ method: "POST" })
       action: "task" | "hint" | "concept" | "practice" | "quiz";
     }) => data
   )
+  .middleware([authMiddleware])
   .handler(async ({ data }) => {
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
@@ -249,12 +251,13 @@ export const updateUserProgress = createServerFn({ method: "POST" })
   });
 
 // Get user progress summary
-export const getUserProgressSummary = createServerFn({ method: "GET" }).handler(
-  async (): Promise<UserProgressSummary> => {
+export const getUserProgressSummary = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async (): Promise<UserProgressSummary> => {
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
@@ -299,17 +302,17 @@ export const getUserProgressSummary = createServerFn({ method: "GET" }).handler(
       console.error("Error fetching user progress:", error);
       throw new Error("Failed to fetch user progress");
     }
-  }
-);
+  });
 
 // Update session title
 export const updateSessionTitle = createServerFn({ method: "POST" })
   .validator((data: { sessionId: string; title: string }) => data)
+  .middleware([authMiddleware])
   .handler(async ({ data }) => {
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
@@ -341,11 +344,12 @@ export const updateSessionTitle = createServerFn({ method: "POST" })
 // End/deactivate a session
 export const endChatSession = createServerFn({ method: "POST" })
   .validator((sessionId: string) => sessionId)
+  .middleware([authMiddleware])
   .handler(async ({ data: sessionId }) => {
     const user = await getUser();
 
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("User not found");
     }
 
     try {
