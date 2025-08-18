@@ -51,6 +51,12 @@ const envSchema = z.object({
       }),
     })
     .default("development"),
+
+  // LLM SDK KEY
+  OPENAI_SDK_KEY: z
+    .string()
+    .min(1, "OPENAI_SDK_KEY is required")
+    .startsWith("sk-", "OPENAI_SDK_KEY must start with 'sk-'"),
 });
 
 // Create a function to validate and parse environment variables

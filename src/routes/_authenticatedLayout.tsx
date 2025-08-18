@@ -1,7 +1,6 @@
 import { SignIn } from "@clerk/tanstack-react-start";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import Aurora from "~/components/backgrounds/Aurora/Aurora";
-import DarkVeil from "~/components/backgrounds/DarkVeil/DarkVeil";
 import { AppSidebar } from "~/components/sidebar";
 import {
   SidebarProvider,

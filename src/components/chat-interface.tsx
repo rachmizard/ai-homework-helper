@@ -10,6 +10,7 @@ export interface ChatMessage {
   type: MessageType;
   content: string;
   timestamp: Date;
+  mode?: "hint" | "concept" | "practice" | "quiz";
 }
 
 interface ChatInterfaceProps {

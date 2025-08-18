@@ -16,6 +16,7 @@ import { Route as AuthenticatedLayoutRouteImport } from './routes/_authenticated
 import { Route as GuestLayoutIndexRouteImport } from './routes/_guestLayout/index'
 import { Route as GuestLayoutSignUpRouteImport } from './routes/_guestLayout/sign-up'
 import { Route as GuestLayoutSignInRouteImport } from './routes/_guestLayout/sign-in'
+import { Route as AuthenticatedLayoutHomeworkHelperRouteImport } from './routes/_authenticatedLayout/homework-helper'
 import { Route as AuthenticatedLayoutDashboardRouteImport } from './routes/_authenticatedLayout/dashboard'
 import { ServerRoute as ApiClerkServerRouteImport } from './routes/api/clerk'
 
@@ -44,6 +45,12 @@ const GuestLayoutSignInRoute = GuestLayoutSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => GuestLayoutRoute,
 } as any)
+const AuthenticatedLayoutHomeworkHelperRoute =
+  AuthenticatedLayoutHomeworkHelperRouteImport.update({
+    id: '/homework-helper',
+    path: '/homework-helper',
+    getParentRoute: () => AuthenticatedLayoutRoute,
+  } as any)
 const AuthenticatedLayoutDashboardRoute =
   AuthenticatedLayoutDashboardRouteImport.update({
     id: '/dashboard',
@@ -58,12 +65,14 @@ const ApiClerkServerRoute = ApiClerkServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedLayoutDashboardRoute
+  '/homework-helper': typeof AuthenticatedLayoutHomeworkHelperRoute
   '/sign-in': typeof GuestLayoutSignInRoute
   '/sign-up': typeof GuestLayoutSignUpRoute
   '/': typeof GuestLayoutIndexRoute
 }
 export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedLayoutDashboardRoute
+  '/homework-helper': typeof AuthenticatedLayoutHomeworkHelperRoute
   '/sign-in': typeof GuestLayoutSignInRoute
   '/sign-up': typeof GuestLayoutSignUpRoute
   '/': typeof GuestLayoutIndexRoute
@@ -73,20 +82,22 @@ export interface FileRoutesById {
   '/_authenticatedLayout': typeof AuthenticatedLayoutRouteWithChildren
   '/_guestLayout': typeof GuestLayoutRouteWithChildren
   '/_authenticatedLayout/dashboard': typeof AuthenticatedLayoutDashboardRoute
+  '/_authenticatedLayout/homework-helper': typeof AuthenticatedLayoutHomeworkHelperRoute
   '/_guestLayout/sign-in': typeof GuestLayoutSignInRoute
   '/_guestLayout/sign-up': typeof GuestLayoutSignUpRoute
   '/_guestLayout/': typeof GuestLayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/dashboard' | '/sign-in' | '/sign-up' | '/'
+  fullPaths: '/dashboard' | '/homework-helper' | '/sign-in' | '/sign-up' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/dashboard' | '/sign-in' | '/sign-up' | '/'
+  to: '/dashboard' | '/homework-helper' | '/sign-in' | '/sign-up' | '/'
   id:
     | '__root__'
     | '/_authenticatedLayout'
     | '/_guestLayout'
     | '/_authenticatedLayout/dashboard'
+    | '/_authenticatedLayout/homework-helper'
     | '/_guestLayout/sign-in'
     | '/_guestLayout/sign-up'
     | '/_guestLayout/'
@@ -155,6 +166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestLayoutSignInRouteImport
       parentRoute: typeof GuestLayoutRoute
     }
+    '/_authenticatedLayout/homework-helper': {
+      id: '/_authenticatedLayout/homework-helper'
+      path: '/homework-helper'
+      fullPath: '/homework-helper'
+      preLoaderRoute: typeof AuthenticatedLayoutHomeworkHelperRouteImport
+      parentRoute: typeof AuthenticatedLayoutRoute
+    }
     '/_authenticatedLayout/dashboard': {
       id: '/_authenticatedLayout/dashboard'
       path: '/dashboard'
@@ -178,10 +196,13 @@ declare module '@tanstack/react-start/server' {
 
 interface AuthenticatedLayoutRouteChildren {
   AuthenticatedLayoutDashboardRoute: typeof AuthenticatedLayoutDashboardRoute
+  AuthenticatedLayoutHomeworkHelperRoute: typeof AuthenticatedLayoutHomeworkHelperRoute
 }
 
 const AuthenticatedLayoutRouteChildren: AuthenticatedLayoutRouteChildren = {
   AuthenticatedLayoutDashboardRoute: AuthenticatedLayoutDashboardRoute,
+  AuthenticatedLayoutHomeworkHelperRoute:
+    AuthenticatedLayoutHomeworkHelperRoute,
 }
 
 const AuthenticatedLayoutRouteWithChildren =

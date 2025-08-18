@@ -5,9 +5,10 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
+import { QueryProvider } from "~/components/query-provider";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
-import { fetchClerkAuth } from "~/handlers/auth";
+import { fetchClerkAuth } from "~/handlers/auth.handler";
 import { seo } from "~/handlers/seo";
 import appCss from "~/styles/app.css?url";
 
@@ -71,20 +72,22 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <ThemeProvider defaultTheme="dark" storageKey="homework-helper-theme">
-        <html>
-          <head>
-            <HeadContent />
-          </head>
-          <body>
-            {children}
-            <Toaster />
+      <QueryProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="homework-helper-theme">
+          <html>
+            <head>
+              <HeadContent />
+            </head>
+            <body>
+              {children}
+              <Toaster />
 
-            <TanStackRouterDevtools position="bottom-right" />
-            <Scripts />
-          </body>
-        </html>
-      </ThemeProvider>
+              <TanStackRouterDevtools position="bottom-right" />
+              <Scripts />
+            </body>
+          </html>
+        </ThemeProvider>
+      </QueryProvider>
     </ClerkProvider>
   );
 }

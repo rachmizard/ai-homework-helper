@@ -21,8 +21,8 @@ Support Chrome, Safari, Firefox, Edge (latest versions) on desktop/mobile.
 
 
 Technical Needs:
-Frontend: HTML5/CSS/JavaScript (React for responsive UI).
-Backend: Node.js or Python (Flask) for API handling; OCR integration (Tesseract.js for client-side or Google Cloud Vision for server-side).
+Frontend: React & Tailwind CSS
+Backend: Tanstack Start for API handling; OCR integration (Tesseract.js for client-side or Google Cloud Vision for server-side).
 NLP: Basic subject detection using regex for equations or keyword analysis for writing/summary.
 
 
