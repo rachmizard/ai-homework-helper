@@ -1,5 +1,7 @@
 import { SignIn } from "@clerk/tanstack-react-start";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import Aurora from "~/components/backgrounds/Aurora/Aurora";
+import DarkVeil from "~/components/backgrounds/DarkVeil/DarkVeil";
 import { AppSidebar } from "~/components/sidebar";
 import {
   SidebarProvider,
@@ -18,7 +20,15 @@ export const Route = createFileRoute("/_authenticatedLayout")({
   errorComponent: ({ error }) => {
     if (error.message === NOT_AUTHENTICATED_ERROR) {
       return (
-        <div className="flex items-center justify-center p-12 min-h-screen">
+        <div className="flex items-center justify-center p-12 min-h-screen relative overflow-hidden">
+          <div className="absolute inset-0">
+            <Aurora
+              colorStops={["#9333ea", "#ec4899", "#3b82f6"]}
+              amplitude={1.5}
+              blend={0.8}
+              speed={0.5}
+            />
+          </div>
           <SignIn routing="hash" forceRedirectUrl={window.location.href} />
         </div>
       );
