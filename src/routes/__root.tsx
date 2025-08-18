@@ -7,6 +7,12 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
+import {
+  ClerkProvider,
+  UserButton,
+  SignedIn,
+  SignedOut,
+} from "@clerk/tanstack-react-start";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
@@ -64,68 +70,95 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html>
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <div className="p-2 flex gap-2 text-lg">
-          <Link
-            to="/"
-            activeProps={{
-              className: "font-bold",
-            }}
-            activeOptions={{ exact: true }}
-          >
-            Home
-          </Link>{" "}
-          <Link
-            to="/posts"
-            activeProps={{
-              className: "font-bold",
-            }}
-          >
-            Posts
-          </Link>{" "}
-          <Link
-            to="/users"
-            activeProps={{
-              className: "font-bold",
-            }}
-          >
-            Users
-          </Link>{" "}
-          <Link
-            to="/route-a"
-            activeProps={{
-              className: "font-bold",
-            }}
-          >
-            Pathless Layout
-          </Link>{" "}
-          <Link
-            to="/deferred"
-            activeProps={{
-              className: "font-bold",
-            }}
-          >
-            Deferred
-          </Link>{" "}
-          <Link
-            // @ts-expect-error
-            to="/this-route-does-not-exist"
-            activeProps={{
-              className: "font-bold",
-            }}
-          >
-            This Route Does Not Exist
-          </Link>
-        </div>
-        <hr />
-        {children}
-        <TanStackRouterDevtools position="bottom-right" />
-        <Scripts />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html>
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          <div className="p-2 flex gap-2 text-lg items-center">
+            <Link
+              to="/"
+              activeProps={{
+                className: "font-bold",
+              }}
+              activeOptions={{ exact: true }}
+            >
+              Home
+            </Link>{" "}
+            <Link
+              to="/posts"
+              activeProps={{
+                className: "font-bold",
+              }}
+            >
+              Posts
+            </Link>{" "}
+            <Link
+              to="/users"
+              activeProps={{
+                className: "font-bold",
+              }}
+            >
+              Users
+            </Link>{" "}
+            <Link
+              to="/deferred"
+              activeProps={{
+                className: "font-bold",
+              }}
+            >
+              Deferred
+            </Link>{" "}
+            <SignedIn>
+              <Link
+                to="/dashboard"
+                activeProps={{
+                  className: "font-bold",
+                }}
+              >
+                Dashboard
+              </Link>{" "}
+            </SignedIn>
+            <Link
+              // @ts-expect-error
+              to="/this-route-does-not-exist"
+              activeProps={{
+                className: "font-bold",
+              }}
+            >
+              This Route Does Not Exist
+            </Link>
+            <div className="ml-auto flex items-center gap-2">
+              <SignedOut>
+                <Link
+                  to="/sign-in"
+                  activeProps={{
+                    className: "font-bold",
+                  }}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/sign-up"
+                  activeProps={{
+                    className: "font-bold",
+                  }}
+                >
+                  Sign Up
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </div>
+          </div>
+          <hr />
+          {children}
+          <TanStackRouterDevtools position="bottom-right" />
+          <Scripts />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
