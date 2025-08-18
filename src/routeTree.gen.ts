@@ -11,30 +11,14 @@
 import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UsersRouteImport } from './routes/users'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as RedirectRouteImport } from './routes/redirect'
-import { Route as PostsRouteImport } from './routes/posts'
-import { Route as DeferredRouteImport } from './routes/deferred'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UsersIndexRouteImport } from './routes/users.index'
-import { Route as PostsIndexRouteImport } from './routes/posts.index'
-import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
-import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
-import { Route as PostsPostIdDeepRouteImport } from './routes/posts_.$postId.deep'
 import { ServerRoute as CustomScriptDotjsServerRouteImport } from './routes/customScript[.]js'
-import { ServerRoute as ApiUsersServerRouteImport } from './routes/api/users'
-import { ServerRoute as ApiUsersUserIdServerRouteImport } from './routes/api/users.$userId'
 
 const rootServerRouteImport = createServerRootRoute()
 
-const UsersRoute = UsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
@@ -43,21 +27,6 @@ const SignUpRoute = SignUpRouteImport.update({
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RedirectRoute = RedirectRouteImport.update({
-  id: '/redirect',
-  path: '/redirect',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostsRoute = PostsRouteImport.update({
-  id: '/posts',
-  path: '/posts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DeferredRoute = DeferredRouteImport.update({
-  id: '/deferred',
-  path: '/deferred',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -70,186 +39,69 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UsersIndexRoute = UsersIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => UsersRoute,
-} as any)
-const PostsIndexRoute = PostsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PostsRoute,
-} as any)
-const UsersUserIdRoute = UsersUserIdRouteImport.update({
-  id: '/$userId',
-  path: '/$userId',
-  getParentRoute: () => UsersRoute,
-} as any)
-const PostsPostIdRoute = PostsPostIdRouteImport.update({
-  id: '/$postId',
-  path: '/$postId',
-  getParentRoute: () => PostsRoute,
-} as any)
-const PostsPostIdDeepRoute = PostsPostIdDeepRouteImport.update({
-  id: '/posts_/$postId/deep',
-  path: '/posts/$postId/deep',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CustomScriptDotjsServerRoute = CustomScriptDotjsServerRouteImport.update({
   id: '/customScript.js',
   path: '/customScript.js',
   getParentRoute: () => rootServerRouteImport,
 } as any)
-const ApiUsersServerRoute = ApiUsersServerRouteImport.update({
-  id: '/api/users',
-  path: '/api/users',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
-const ApiUsersUserIdServerRoute = ApiUsersUserIdServerRouteImport.update({
-  id: '/$userId',
-  path: '/$userId',
-  getParentRoute: () => ApiUsersServerRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/deferred': typeof DeferredRoute
-  '/posts': typeof PostsRouteWithChildren
-  '/redirect': typeof RedirectRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/users': typeof UsersRouteWithChildren
-  '/posts/$postId': typeof PostsPostIdRoute
-  '/users/$userId': typeof UsersUserIdRoute
-  '/posts/': typeof PostsIndexRoute
-  '/users/': typeof UsersIndexRoute
-  '/posts/$postId/deep': typeof PostsPostIdDeepRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/deferred': typeof DeferredRoute
-  '/redirect': typeof RedirectRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/posts/$postId': typeof PostsPostIdRoute
-  '/users/$userId': typeof UsersUserIdRoute
-  '/posts': typeof PostsIndexRoute
-  '/users': typeof UsersIndexRoute
-  '/posts/$postId/deep': typeof PostsPostIdDeepRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/deferred': typeof DeferredRoute
-  '/posts': typeof PostsRouteWithChildren
-  '/redirect': typeof RedirectRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/users': typeof UsersRouteWithChildren
-  '/posts/$postId': typeof PostsPostIdRoute
-  '/users/$userId': typeof UsersUserIdRoute
-  '/posts/': typeof PostsIndexRoute
-  '/users/': typeof UsersIndexRoute
-  '/posts_/$postId/deep': typeof PostsPostIdDeepRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/dashboard'
-    | '/deferred'
-    | '/posts'
-    | '/redirect'
-    | '/sign-in'
-    | '/sign-up'
-    | '/users'
-    | '/posts/$postId'
-    | '/users/$userId'
-    | '/posts/'
-    | '/users/'
-    | '/posts/$postId/deep'
+  fullPaths: '/' | '/dashboard' | '/sign-in' | '/sign-up'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/dashboard'
-    | '/deferred'
-    | '/redirect'
-    | '/sign-in'
-    | '/sign-up'
-    | '/posts/$postId'
-    | '/users/$userId'
-    | '/posts'
-    | '/users'
-    | '/posts/$postId/deep'
-  id:
-    | '__root__'
-    | '/'
-    | '/dashboard'
-    | '/deferred'
-    | '/posts'
-    | '/redirect'
-    | '/sign-in'
-    | '/sign-up'
-    | '/users'
-    | '/posts/$postId'
-    | '/users/$userId'
-    | '/posts/'
-    | '/users/'
-    | '/posts_/$postId/deep'
+  to: '/' | '/dashboard' | '/sign-in' | '/sign-up'
+  id: '__root__' | '/' | '/dashboard' | '/sign-in' | '/sign-up'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
-  DeferredRoute: typeof DeferredRoute
-  PostsRoute: typeof PostsRouteWithChildren
-  RedirectRoute: typeof RedirectRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
-  UsersRoute: typeof UsersRouteWithChildren
-  PostsPostIdDeepRoute: typeof PostsPostIdDeepRoute
 }
 export interface FileServerRoutesByFullPath {
   '/customScript.js': typeof CustomScriptDotjsServerRoute
-  '/api/users': typeof ApiUsersServerRouteWithChildren
-  '/api/users/$userId': typeof ApiUsersUserIdServerRoute
 }
 export interface FileServerRoutesByTo {
   '/customScript.js': typeof CustomScriptDotjsServerRoute
-  '/api/users': typeof ApiUsersServerRouteWithChildren
-  '/api/users/$userId': typeof ApiUsersUserIdServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
   '/customScript.js': typeof CustomScriptDotjsServerRoute
-  '/api/users': typeof ApiUsersServerRouteWithChildren
-  '/api/users/$userId': typeof ApiUsersUserIdServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/customScript.js' | '/api/users' | '/api/users/$userId'
+  fullPaths: '/customScript.js'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/customScript.js' | '/api/users' | '/api/users/$userId'
-  id: '__root__' | '/customScript.js' | '/api/users' | '/api/users/$userId'
+  to: '/customScript.js'
+  id: '__root__' | '/customScript.js'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
   CustomScriptDotjsServerRoute: typeof CustomScriptDotjsServerRoute
-  ApiUsersServerRoute: typeof ApiUsersServerRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/users': {
-      id: '/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof UsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sign-up': {
       id: '/sign-up'
       path: '/sign-up'
@@ -262,27 +114,6 @@ declare module '@tanstack/react-router' {
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof SignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/redirect': {
-      id: '/redirect'
-      path: '/redirect'
-      fullPath: '/redirect'
-      preLoaderRoute: typeof RedirectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/posts': {
-      id: '/posts'
-      path: '/posts'
-      fullPath: '/posts'
-      preLoaderRoute: typeof PostsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/deferred': {
-      id: '/deferred'
-      path: '/deferred'
-      fullPath: '/deferred'
-      preLoaderRoute: typeof DeferredRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -299,41 +130,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/users/': {
-      id: '/users/'
-      path: '/'
-      fullPath: '/users/'
-      preLoaderRoute: typeof UsersIndexRouteImport
-      parentRoute: typeof UsersRoute
-    }
-    '/posts/': {
-      id: '/posts/'
-      path: '/'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof PostsIndexRouteImport
-      parentRoute: typeof PostsRoute
-    }
-    '/users/$userId': {
-      id: '/users/$userId'
-      path: '/$userId'
-      fullPath: '/users/$userId'
-      preLoaderRoute: typeof UsersUserIdRouteImport
-      parentRoute: typeof UsersRoute
-    }
-    '/posts/$postId': {
-      id: '/posts/$postId'
-      path: '/$postId'
-      fullPath: '/posts/$postId'
-      preLoaderRoute: typeof PostsPostIdRouteImport
-      parentRoute: typeof PostsRoute
-    }
-    '/posts_/$postId/deep': {
-      id: '/posts_/$postId/deep'
-      path: '/posts/$postId/deep'
-      fullPath: '/posts/$postId/deep'
-      preLoaderRoute: typeof PostsPostIdDeepRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 declare module '@tanstack/react-start/server' {
@@ -345,76 +141,20 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof CustomScriptDotjsServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
-    '/api/users': {
-      id: '/api/users'
-      path: '/api/users'
-      fullPath: '/api/users'
-      preLoaderRoute: typeof ApiUsersServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/api/users/$userId': {
-      id: '/api/users/$userId'
-      path: '/$userId'
-      fullPath: '/api/users/$userId'
-      preLoaderRoute: typeof ApiUsersUserIdServerRouteImport
-      parentRoute: typeof ApiUsersServerRoute
-    }
   }
 }
-
-interface PostsRouteChildren {
-  PostsPostIdRoute: typeof PostsPostIdRoute
-  PostsIndexRoute: typeof PostsIndexRoute
-}
-
-const PostsRouteChildren: PostsRouteChildren = {
-  PostsPostIdRoute: PostsPostIdRoute,
-  PostsIndexRoute: PostsIndexRoute,
-}
-
-const PostsRouteWithChildren = PostsRoute._addFileChildren(PostsRouteChildren)
-
-interface UsersRouteChildren {
-  UsersUserIdRoute: typeof UsersUserIdRoute
-  UsersIndexRoute: typeof UsersIndexRoute
-}
-
-const UsersRouteChildren: UsersRouteChildren = {
-  UsersUserIdRoute: UsersUserIdRoute,
-  UsersIndexRoute: UsersIndexRoute,
-}
-
-const UsersRouteWithChildren = UsersRoute._addFileChildren(UsersRouteChildren)
-
-interface ApiUsersServerRouteChildren {
-  ApiUsersUserIdServerRoute: typeof ApiUsersUserIdServerRoute
-}
-
-const ApiUsersServerRouteChildren: ApiUsersServerRouteChildren = {
-  ApiUsersUserIdServerRoute: ApiUsersUserIdServerRoute,
-}
-
-const ApiUsersServerRouteWithChildren = ApiUsersServerRoute._addFileChildren(
-  ApiUsersServerRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
-  DeferredRoute: DeferredRoute,
-  PostsRoute: PostsRouteWithChildren,
-  RedirectRoute: RedirectRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
-  UsersRoute: UsersRouteWithChildren,
-  PostsPostIdDeepRoute: PostsPostIdDeepRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
   CustomScriptDotjsServerRoute: CustomScriptDotjsServerRoute,
-  ApiUsersServerRoute: ApiUsersServerRouteWithChildren,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)

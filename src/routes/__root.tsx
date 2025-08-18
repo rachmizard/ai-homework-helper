@@ -87,30 +87,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             >
               Home
             </Link>{" "}
-            <Link
-              to="/posts"
-              activeProps={{
-                className: "font-bold",
-              }}
-            >
-              Posts
-            </Link>{" "}
-            <Link
-              to="/users"
-              activeProps={{
-                className: "font-bold",
-              }}
-            >
-              Users
-            </Link>{" "}
-            <Link
-              to="/deferred"
-              activeProps={{
-                className: "font-bold",
-              }}
-            >
-              Deferred
-            </Link>{" "}
             <SignedIn>
               <Link
                 to="/dashboard"
