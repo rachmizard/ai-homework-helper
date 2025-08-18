@@ -43,6 +43,11 @@ import {
   useEndChatSession,
 } from "~/hooks/use-chat-history";
 import { useUser } from "~/hooks/use-user";
+import {
+  useStreamingAI,
+  type StreamingMode,
+  useSubjectDetection,
+} from "~/hooks/use-streaming-ai";
 
 export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
   component: HomeworkHelper,
@@ -57,12 +62,27 @@ function HomeworkHelper() {
   const [textInput, setTextInput] = React.useState("");
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
-  const [detectedSubject, setDetectedSubject] = React.useState<Subject | null>(
-    null
-  );
+  // AI-based subject detection
+  const {
+    detectedSubject,
+    isDetecting,
+    detectSubject: detectSubjectAI,
+    resetSubject,
+  } = useSubjectDetection();
   const [inputMethod, setInputMethod] = React.useState<"photo" | "text" | null>(
     null
   );
+  const [currentQuestion, setCurrentQuestion] = React.useState<string>("");
+  const [extractedText, setExtractedText] = React.useState<string>("");
+
+  // Streaming AI hook
+  const {
+    isStreaming,
+    streamingContent,
+    streamingType,
+    startStream,
+    resetStream,
+  } = useStreamingAI();
 
   // Chat session management
   const [currentSessionId, setCurrentSessionId] = React.useState<string | null>(
@@ -93,7 +113,8 @@ function HomeworkHelper() {
       );
       setMessages(chatMessages);
       setSessionTitle(currentSessionData.title);
-      setDetectedSubject(currentSessionData.subject);
+      // Note: We don't set detectedSubject here as it's managed by the AI detection hook
+      // The subject will be detected when the user interacts with the content
     }
   }, [currentSessionData]);
 
@@ -103,14 +124,16 @@ function HomeworkHelper() {
     setTextInput("");
 
     // Simulate OCR processing (in real implementation, this would call OCR service)
-    setTimeout(() => {
+    setTimeout(async () => {
       const mockExtractedText = "Solve: 2x + 3 = 7";
+      setExtractedText(mockExtractedText);
+      setCurrentQuestion(mockExtractedText);
       addMessageToChat("user", `📸 Photo uploaded: "${mockExtractedText}"`);
-      detectSubject(mockExtractedText);
+      await detectSubjectAI(mockExtractedText);
 
       // Create new session if none exists
       if (!currentSessionId) {
-        createNewSession(mockExtractedText, "photo");
+        await createNewSession(mockExtractedText, "photo");
       }
     }, 1000);
   };
@@ -125,8 +148,10 @@ function HomeworkHelper() {
 
     setInputMethod("text");
     setSelectedFile(null);
+    setCurrentQuestion(textInput);
+    setExtractedText("");
     addMessageToChat("user", textInput);
-    detectSubject(textInput);
+    await detectSubjectAI(textInput);
 
     // Create new session if none exists
     if (!currentSessionId) {
@@ -143,7 +168,16 @@ function HomeworkHelper() {
     originalInput: string,
     inputMethod: "photo" | "text"
   ) => {
-    if (!detectedSubject) return;
+    // Wait for AI detection to complete if it's still in progress
+    if (isDetecting) {
+      // Wait a bit for detection to complete
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    if (!detectedSubject) {
+      toast.error("Subject detection failed. Please try again.");
+      return;
+    }
 
     const title = generateSessionTitle(originalInput);
 
@@ -207,21 +241,7 @@ function HomeworkHelper() {
     return `${truncated} - ${timestamp}`;
   };
 
-  const detectSubject = (text: string) => {
-    let subject: Subject;
-    if (/\d+x|solve|equation|calculate/i.test(text)) {
-      subject = "math";
-    } else if (/essay|write|paragraph/i.test(text)) {
-      subject = "writing";
-    } else if (/summarize|summary|main idea/i.test(text)) {
-      subject = "summary";
-    } else if (/science|physics|chemistry|biology/i.test(text)) {
-      subject = "science";
-    } else {
-      subject = "math"; // Default
-    }
-    setDetectedSubject(subject);
-  };
+  // AI-based subject detection is now handled by the useSubjectDetection hook
 
   const addMessageToChat = (
     type: "user" | "assistant",
@@ -239,9 +259,10 @@ function HomeworkHelper() {
   };
 
   const handleModeSelect = async (mode: Mode) => {
-    if (!detectedSubject) return;
+    if (!detectedSubject || !currentQuestion) return;
 
     setIsProcessing(true);
+    resetStream();
 
     try {
       // Update progress
@@ -250,35 +271,14 @@ function HomeworkHelper() {
         action: mode,
       });
 
-      // Simulate AI processing (in real implementation, this would call OpenAI)
-      setTimeout(async () => {
-        let response = "";
+      // Start streaming AI response
+      await startStream(mode as StreamingMode, {
+        question: currentQuestion,
+        subject: detectedSubject,
+        extractedText: extractedText || undefined,
+      });
 
-        switch (mode) {
-          case "hint":
-            response = getHintResponse(detectedSubject);
-            break;
-          case "concept":
-            response = getConceptResponse(detectedSubject);
-            break;
-          case "practice":
-            response = getPracticeResponse(detectedSubject);
-            break;
-          case "quiz":
-            response = getQuizResponse(detectedSubject);
-            break;
-        }
-
-        addMessageToChat("assistant", response, mode);
-
-        // Save to database
-        await saveChatMessage("assistant", response, mode);
-
-        setIsProcessing(false);
-        toast.success(
-          `${mode.charAt(0).toUpperCase() + mode.slice(1)} generated! 🎉`
-        );
-      }, 1500);
+      setIsProcessing(false);
     } catch (error) {
       console.error("Error handling mode select:", error);
       setIsProcessing(false);
@@ -286,10 +286,37 @@ function HomeworkHelper() {
     }
   };
 
+  // Handle stream completion - add final message to chat
+  React.useEffect(() => {
+    if (streamingContent && streamingType && !isStreaming) {
+      // Stream is complete, add the final message to chat
+      const finalMessage: ChatMessage = {
+        id: Date.now().toString(),
+        type: "assistant",
+        content: streamingContent,
+        timestamp: new Date(),
+        mode: streamingType,
+        isComplete: true,
+      };
+
+      setMessages((prev) => [...prev, finalMessage]);
+
+      // Save to database
+      if (currentSessionId) {
+        saveChatMessage("assistant", streamingContent, streamingType);
+      }
+
+      // Reset streaming state
+      setTimeout(() => {
+        resetStream();
+      }, 1000);
+    }
+  }, [isStreaming, streamingContent, streamingType, currentSessionId]);
+
   const handleNewSession = () => {
     setCurrentSessionId(null);
     setMessages([]);
-    setDetectedSubject(null);
+    resetSubject();
     setInputMethod(null);
     setSelectedFile(null);
     setTextInput("");
@@ -533,10 +560,16 @@ function HomeworkHelper() {
               )}
 
               {/* Subject Detection */}
-              {detectedSubject && (
+              {isDetecting && (
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <RefreshCw className="h-4 w-4 text-primary animate-spin" />
+                  <span className="text-sm">AI is detecting subject...</span>
+                </div>
+              )}
+              {detectedSubject && !isDetecting && (
                 <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  <span className="text-sm">Detected subject:</span>
+                  <span className="text-sm">AI detected subject:</span>
                   <Badge variant="secondary">
                     {detectedSubject.charAt(0).toUpperCase() +
                       detectedSubject.slice(1)}
@@ -550,8 +583,8 @@ function HomeworkHelper() {
                   <Button
                     variant="outline"
                     onClick={() => handleModeSelect("hint")}
-                    disabled={isProcessing}
-                    className="hover:border-yellow-500"
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-yellow-500 disabled:opacity-50"
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     Get Hint 💡
@@ -559,8 +592,8 @@ function HomeworkHelper() {
                   <Button
                     variant="outline"
                     onClick={() => handleModeSelect("concept")}
-                    disabled={isProcessing}
-                    className="hover:border-blue-500"
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-blue-500 disabled:opacity-50"
                   >
                     <Brain className="h-4 w-4 mr-2" />
                     Learn Concept 🧠
@@ -568,8 +601,8 @@ function HomeworkHelper() {
                   <Button
                     variant="outline"
                     onClick={() => handleModeSelect("practice")}
-                    disabled={isProcessing}
-                    className="hover:border-green-500"
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-green-500 disabled:opacity-50"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Practice 🔄
@@ -577,8 +610,8 @@ function HomeworkHelper() {
                   <Button
                     variant="outline"
                     onClick={() => handleModeSelect("quiz")}
-                    disabled={isProcessing}
-                    className="hover:border-rose-500"
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-rose-500 disabled:opacity-50"
                   >
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Take Quiz ✅
@@ -601,6 +634,15 @@ function HomeworkHelper() {
               <ChatInterface
                 messages={messages}
                 className="h-full overflow-y-auto"
+                streamingMessage={
+                  isStreaming && streamingContent && streamingType
+                    ? {
+                        content: streamingContent,
+                        type: streamingType,
+                        isComplete: false,
+                      }
+                    : undefined
+                }
               />
             </CardContent>
           </Card>
