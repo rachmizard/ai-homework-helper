@@ -1,21 +1,24 @@
 import { useUser } from "@clerk/tanstack-react-start";
-import {
-  Bot,
-  Send,
-  User,
-  Camera,
-  Type,
-  Sparkles,
-  RefreshCw,
-} from "lucide-react";
+import { Bot, Camera, RefreshCw, Send, Sparkles, Type } from "lucide-react";
 import * as React from "react";
-import { StreamingText } from "~/components/streaming-text";
+import { Suspense } from "react";
+import { FileUpload } from "~/components/file-upload";
+// Lazy load heavy markdown components
+const MarkdownMessage = React.lazy(() =>
+  import("~/components/markdown-message").then((module) => ({
+    default: module.MarkdownMessage,
+  }))
+);
+const StreamingMarkdown = React.lazy(() =>
+  import("~/components/streaming-markdown").then((module) => ({
+    default: module.StreamingMarkdown,
+  }))
+);
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { Textarea } from "~/components/ui/textarea";
 import { Input } from "~/components/ui/input";
-import { Badge } from "~/components/ui/badge";
-import { FileUpload } from "~/components/file-upload";
+import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
@@ -60,7 +63,7 @@ interface ChatInterfaceProps {
   isSessionTitleSubmitted?: boolean;
 }
 
-export function ChatInterface({
+export default function ChatInterface({
   messages,
   className,
   streamingMessage,
@@ -90,15 +93,12 @@ export function ChatInterface({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  React.useEffect(() => {
-    scrollToBottom();
-  }, [messages, streamingMessage]);
-
   const handleSendMessage = () => {
     if (!inputValue.trim() || !onSendMessage || isStreaming) return;
 
     onSendMessage(inputValue.trim());
     setInputValue("");
+    scrollToBottom();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -323,11 +323,13 @@ export function ChatInterface({
                 <Bot className="h-4 w-4" />
               </div>
               <Card className="max-w-[80%] px-4 py-3 bg-muted">
-                <StreamingText
-                  content={streamingMessage.content}
-                  isComplete={streamingMessage.isComplete}
-                  className="text-sm"
-                />
+                <Suspense fallback={<div className="text-sm">Loading...</div>}>
+                  <StreamingMarkdown
+                    content={streamingMessage.content}
+                    isComplete={streamingMessage.isComplete}
+                    className="text-sm"
+                  />
+                </Suspense>
                 {!streamingMessage.isComplete && (
                   <div className="flex items-center gap-1 mt-2">
                     <div className="flex space-x-1">
@@ -415,7 +417,13 @@ function ChatMessage({ message }: ChatMessageProps) {
           isUser ? "bg-primary text-primary-foreground" : "bg-muted"
         )}
       >
-        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        {isUser ? (
+          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        ) : (
+          <Suspense fallback={<div className="text-sm">Loading...</div>}>
+            <MarkdownMessage content={message.content} className="text-sm" />
+          </Suspense>
+        )}
         <p
           className={cn(
             "text-xs mt-1",

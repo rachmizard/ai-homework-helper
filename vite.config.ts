@@ -8,6 +8,9 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  build: {
+    chunkSizeWarningLimit: 600, // Increase limit slightly for better chunking
+  },
   plugins: [
     tsConfigPaths({
       projects: ["./tsconfig.json"],

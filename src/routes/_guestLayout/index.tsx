@@ -11,7 +11,6 @@ import {
 import * as React from "react";
 import { toast } from "sonner";
 import Aurora from "~/components/backgrounds/Aurora/Aurora";
-import { ChatInterface, ChatMessage } from "~/components/chat-interface";
 import { FileUpload } from "~/components/file-upload";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -23,6 +22,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
+import type { ChatMessage } from "~/components/chat-interface";
+
+const ChatInterface = React.lazy(() => import("~/components/chat-interface"));
 
 export const Route = createFileRoute("/_guestLayout/")({
   component: HomeworkHelper,

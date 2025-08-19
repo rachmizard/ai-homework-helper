@@ -11,6 +11,7 @@ yarn.lock
 .output
 .nitro
 .tanstack
+.netlify
 /build/
 /api/
 /server/build

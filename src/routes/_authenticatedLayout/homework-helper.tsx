@@ -10,9 +10,12 @@ import {
   Trash,
 } from "lucide-react";
 import * as React from "react";
+import { Suspense } from "react";
 import { toast } from "sonner";
-import Aurora from "~/components/backgrounds/Aurora/Aurora";
-import { ChatInterface, ChatMessage } from "~/components/chat-interface";
+// Lazy load heavy background component
+const Aurora = React.lazy(
+  () => import("~/components/backgrounds/Aurora/Aurora")
+);
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -52,6 +55,10 @@ import {
 } from "~/hooks/use-streaming-ai";
 import { useUser } from "~/hooks/use-user";
 import { useGetChatSession, useSetChatSession } from "~/store/chat-session";
+import type { ChatMessage } from "~/components/chat-interface";
+
+// Lazy load the chat interface component
+const ChatInterface = React.lazy(() => import("~/components/chat-interface"));
 
 export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
   component: HomeworkHelper,
@@ -440,12 +447,18 @@ function HomeworkHelper() {
       <div className="relative overflow-hidden">
         {/* Background Effects */}
         <div className="absolute top-0 left-0 right-0 bottom-0 opacity-20 z-0">
-          <Aurora
-            colorStops={["#9333ea", "#ec4899", "#3b82f6"]}
-            amplitude={1.5}
-            blend={0.8}
-            speed={0.5}
-          />
+          <Suspense
+            fallback={
+              <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-blue-500/20" />
+            }
+          >
+            <Aurora
+              colorStops={["#9333ea", "#ec4899", "#3b82f6"]}
+              amplitude={1.5}
+              blend={0.8}
+              speed={0.5}
+            />
+          </Suspense>
         </div>
 
         <div className="container mx-auto px-4 pt-8 pb-4 relative z-0">
@@ -594,37 +607,45 @@ function HomeworkHelper() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-hidden p-0">
-            <ChatInterface
-              messages={messages}
-              className="h-full"
-              streamingMessage={
-                isStreaming && streamingContent && streamingType
-                  ? {
-                      content: streamingContent,
-                      type: streamingType,
-                      isComplete: false,
-                    }
-                  : undefined
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  Loading chat interface...
+                </div>
               }
-              onSendMessage={handleDirectChatMessage}
-              isStreaming={isStreaming}
-              showInput={!!isSessionTitleSubmitted && messages.length > 0}
-              // Enhanced props for integrated input functionality
-              sessionTitle={sessionTitle}
-              onSessionTitleChange={setSessionTitle}
-              onSessionTitleSubmit={handleSessionNameSubmit}
-              inputMethod={inputMethod}
-              onInputMethodChange={setInputMethod}
-              selectedFile={selectedFile}
-              onFileSelect={handleFileSelect}
-              onFileRemove={handleFileRemove}
-              textInput={textInput}
-              onTextInputChange={setTextInput}
-              onTextSubmit={handleTextSubmit}
-              isDetecting={isDetecting}
-              detectedSubject={detectedSubject}
-              isSessionTitleSubmitted={isSessionTitleSubmitted}
-            />
+            >
+              <ChatInterface
+                messages={messages}
+                className="h-full"
+                streamingMessage={
+                  isStreaming && streamingContent && streamingType
+                    ? {
+                        content: streamingContent,
+                        type: streamingType,
+                        isComplete: false,
+                      }
+                    : undefined
+                }
+                onSendMessage={handleDirectChatMessage}
+                isStreaming={isStreaming}
+                showInput={!!isSessionTitleSubmitted && messages.length > 0}
+                // Enhanced props for integrated input functionality
+                sessionTitle={sessionTitle}
+                onSessionTitleChange={setSessionTitle}
+                onSessionTitleSubmit={handleSessionNameSubmit}
+                inputMethod={inputMethod}
+                onInputMethodChange={setInputMethod}
+                selectedFile={selectedFile}
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                textInput={textInput}
+                onTextInputChange={setTextInput}
+                onTextSubmit={handleTextSubmit}
+                isDetecting={isDetecting}
+                detectedSubject={detectedSubject}
+                isSessionTitleSubmitted={isSessionTitleSubmitted}
+              />
+            </Suspense>
 
             {/* Action Buttons */}
             {messages.length > 0 && (
