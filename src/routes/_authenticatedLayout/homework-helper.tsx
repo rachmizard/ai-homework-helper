@@ -151,7 +151,6 @@ function HomeworkHelper() {
       const mockExtractedText = "Solve: 2x + 3 = 7";
       setExtractedText(mockExtractedText);
       setCurrentQuestion(mockExtractedText);
-      addMessageToChat("user", `📸 Photo uploaded: "${mockExtractedText}"`);
       await detectSubjectAI(mockExtractedText);
 
       // Create new session if none exists
@@ -182,7 +181,6 @@ function HomeworkHelper() {
     setSelectedFile(null);
     setCurrentQuestion(textInput);
     setExtractedText("");
-    addMessageToChat("user", textInput);
     const subjectResponse = await detectSubjectAI(textInput);
 
     if (!subjectResponse?.subject) {
@@ -191,23 +189,37 @@ function HomeworkHelper() {
     }
 
     // Create new session if none exists
-    if (!currentSessionId) {
-      await createNewSession({
-        originalInput: textInput,
-        inputMethod: "text",
-        subject: subjectResponse?.subject,
+
+    // Add message to existing session
+    const session = await createNewSession({
+      originalInput: textInput,
+      inputMethod: "text",
+      subject: subjectResponse?.subject,
+    });
+
+    if (!session) {
+      toast.error("Failed to create session. Please try again.");
+      return;
+    }
+
+    try {
+      await addMessageMutation.mutateAsync({
+        sessionId: session?.id || "",
+        ...{
+          type: "user",
+          content: textInput,
+          mode: "chat",
+        },
       });
-    } else {
-      // Add message to existing session
-      await saveChatMessage("user", textInput);
+    } catch (error) {
+      console.error("Error saving message:", error);
+      // Don't show error toast for message saving failures as it might be disruptive
     }
   };
 
   const handleDirectChatMessage = async (message: string) => {
     if (!message.trim() || !sessionTitle) return;
 
-    // Add user message to chat
-    addMessageToChat("user", message);
     await saveChatMessage("user", message);
 
     // Update current question context for AI responses
@@ -273,6 +285,8 @@ function HomeworkHelper() {
         subject: subject as "math" | "science" | "writing" | "summary",
         action: "task",
       });
+
+      return session;
     } catch (error) {
       console.error("Error creating session:", error);
     }
@@ -307,16 +321,6 @@ function HomeworkHelper() {
   };
 
   // AI-based subject detection is now handled by the useSubjectDetection hook
-
-  const addMessageToChat = (
-    type: "user" | "assistant",
-    content: string,
-    mode?: Mode
-  ) => {
-    // This function is now only used for optimistic updates
-    // The actual messages are derived from currentSessionData
-    // We'll rely on the React Query cache to update the UI
-  };
 
   // Template messages for different modes
   const getTemplateMessage = (mode: Mode): string => {
@@ -365,6 +369,10 @@ function HomeworkHelper() {
       }
 
       resetStream();
+      if (!detectedSubject) {
+        toast.error("Failed to detect subject. Please try again.");
+        return;
+      }
       await startStream(mode as StreamingMode, {
         question: currentQuestion,
         subject: detectedSubject,
@@ -392,6 +400,7 @@ function HomeworkHelper() {
     setCurrentQuestion("");
     setExtractedText("");
     resetSubject();
+    setIsSessionTitleSubmitted(false);
     toast.success("Ready for a new homework session! ✨");
   };
 
@@ -457,7 +466,7 @@ function HomeworkHelper() {
 
       {/* Session Management */}
       <div className="container mx-auto px-4 mb-4 relative z-10">
-        <div className="flex gap-2 items-center justify-between mb-4">
+        <div className="flex gap-2 items-center justify-between flex-wrap mb-4">
           <div className="flex gap-2 items-center">
             <Button
               onClick={handleNewSession}
@@ -486,46 +495,13 @@ function HomeworkHelper() {
           </div>
 
           <div className="flex items-center gap-2">
-            {currentSessionId && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        deleteSessionMutation.mutate(currentSessionId, {
-                          onSuccess: () => {
-                            setCurrentSessionId(null);
-                            setCurrentQuestion("");
-                            setExtractedText("");
-                            setTextInput("");
-                            setSelectedFile(null);
-                            setInputMethod(null);
-                            setSessionTitle("");
-                            resetSubject();
-                            toast.success("Session deleted! 💾");
-                          },
-                        })
-                      }
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Delete Session</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-
             {userSessions && userSessions.length > 0 && (
               <Select
                 value={currentSessionId || undefined}
                 onValueChange={loadSession}
                 disabled={loadingSessions}
               >
-                <SelectTrigger className="w-[300px]">
+                <SelectTrigger className="w-full md:w-[300px]">
                   <SelectValue
                     placeholder={
                       loadingSessions
@@ -546,6 +522,48 @@ function HomeworkHelper() {
                 </SelectContent>
               </Select>
             )}
+
+            {currentSessionId && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        deleteSessionMutation.mutate(currentSessionId, {
+                          onSuccess: () => {
+                            const latestSession =
+                              userSessions?.[userSessions.length - 1];
+
+                            if (latestSession) {
+                              setCurrentSessionId(latestSession.id);
+                              setSessionTitle(latestSession.title);
+                              setIsSessionTitleSubmitted(true);
+                            } else {
+                              setCurrentSessionId(null);
+                              setCurrentQuestion("");
+                              setExtractedText("");
+                              setTextInput("");
+                              setSelectedFile(null);
+                              setInputMethod(null);
+                              setSessionTitle("");
+                              resetSubject();
+                            }
+                            toast.success("Session deleted! 💾");
+                          },
+                        })
+                      }
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete Session</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         </div>
 
@@ -555,7 +573,7 @@ function HomeworkHelper() {
               <Sparkles className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Current Session:</span>
               <span className="text-sm">{currentSessionData.title}</span>
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="default" className="ml-2">
                 {currentSessionData.subject.charAt(0).toUpperCase() +
                   currentSessionData.subject.slice(1)}
               </Badge>
@@ -570,7 +588,7 @@ function HomeworkHelper() {
           <CardHeader>
             <CardTitle>Your Learning Journey 🎯</CardTitle>
             <CardDescription>
-              {!sessionTitle
+              {!isSessionTitleSubmitted
                 ? "Set a session name to start your learning journey!"
                 : "I'm here to guide you! Ask questions, have conversations, and get help. Your progress is saved automatically."}
             </CardDescription>
@@ -590,7 +608,7 @@ function HomeworkHelper() {
               }
               onSendMessage={handleDirectChatMessage}
               isStreaming={isStreaming}
-              showInput={!!sessionTitle && messages.length > 0}
+              showInput={!!isSessionTitleSubmitted && messages.length > 0}
               // Enhanced props for integrated input functionality
               sessionTitle={sessionTitle}
               onSessionTitleChange={setSessionTitle}
@@ -611,7 +629,7 @@ function HomeworkHelper() {
             {/* Action Buttons */}
             {messages.length > 0 && (
               <div className="p-4 border-t bg-muted/30">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   <Button
                     variant="outline"
                     onClick={() => handleModeSelect("hint")}

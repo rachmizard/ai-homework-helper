@@ -109,7 +109,7 @@ export function ChatInterface({
   };
 
   // Show initial setup if no session title or session title not submitted
-  if (!sessionTitle || !isSessionTitleSubmitted) {
+  if (!isSessionTitleSubmitted) {
     return (
       <div
         className={cn(
@@ -315,43 +315,43 @@ export function ChatInterface({
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))}
-        </div>
 
-        {/* Streaming message */}
-        {streamingMessage && (
-          <div className="flex gap-3 justify-start">
-            <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Bot className="h-4 w-4" />
-            </div>
-            <Card className="max-w-[80%] px-4 py-3 bg-muted">
-              <StreamingText
-                content={streamingMessage.content}
-                isComplete={streamingMessage.isComplete}
-                className="text-sm"
-              />
-              {!streamingMessage.isComplete && (
-                <div className="flex items-center gap-1 mt-2">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+          {/* Streaming message */}
+          {streamingMessage && (
+            <div className="flex gap-3 justify-start">
+              <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Bot className="h-4 w-4" />
+              </div>
+              <Card className="max-w-[80%] px-4 py-3 bg-muted">
+                <StreamingText
+                  content={streamingMessage.content}
+                  isComplete={streamingMessage.isComplete}
+                  className="text-sm"
+                />
+                {!streamingMessage.isComplete && (
+                  <div className="flex items-center gap-1 mt-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+                    </div>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      AI is thinking...
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground ml-2">
-                    AI is thinking...
-                  </span>
-                </div>
-              )}
-              {streamingMessage.isComplete && (
-                <p className="text-xs mt-1 text-muted-foreground">
-                  {new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              )}
-            </Card>
-          </div>
-        )}
+                )}
+                {streamingMessage.isComplete && (
+                  <p className="text-xs mt-1 text-muted-foreground">
+                    {new Date().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                )}
+              </Card>
+            </div>
+          )}
+        </div>
 
         <div ref={messagesEndRef} />
       </ScrollArea>
@@ -365,7 +365,7 @@ export function ChatInterface({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="min-h-[60px] max-h-[120px] resize-none"
+              className="min-h-[80px] max-h-[120px] resize-none"
               disabled={isStreaming}
             />
             <Button

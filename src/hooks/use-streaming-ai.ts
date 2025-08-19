@@ -163,7 +163,7 @@ export const useSubjectDetection = () => {
   }, [detectSubjectMutation]);
 
   return {
-    detectedSubject: detectSubjectMutation.data?.subject || "math",
+    detectedSubject: detectSubjectMutation.data?.subject,
     isDetecting: detectSubjectMutation.isPending,
     detectSubject,
     resetSubject,
