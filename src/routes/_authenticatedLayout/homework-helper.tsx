@@ -26,6 +26,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
+import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -75,6 +76,10 @@ function HomeworkHelper() {
   const [currentQuestion, setCurrentQuestion] = React.useState<string>("");
   const [extractedText, setExtractedText] = React.useState<string>("");
 
+  // Session name state
+  const [sessionName, setSessionName] = React.useState("");
+  const [isSessionNameSet, setIsSessionNameSet] = React.useState(false);
+
   // Streaming AI hook
   const {
     isStreaming,
@@ -118,7 +123,22 @@ function HomeworkHelper() {
     }
   }, [currentSessionData]);
 
+  const handleSessionNameSubmit = () => {
+    if (!sessionName.trim()) {
+      toast.error("Please enter a session name");
+      return;
+    }
+    setIsSessionNameSet(true);
+    setSessionTitle(sessionName);
+    toast.success("Session name set! You can now start your homework session.");
+  };
+
   const handleFileSelect = async (file: File) => {
+    if (!isSessionNameSet) {
+      toast.error("Please set a session name first");
+      return;
+    }
+
     setSelectedFile(file);
     setInputMethod("photo");
     setTextInput("");
@@ -145,6 +165,10 @@ function HomeworkHelper() {
 
   const handleTextSubmit = async () => {
     if (!textInput.trim()) return;
+    if (!isSessionNameSet) {
+      toast.error("Please set a session name first");
+      return;
+    }
 
     setInputMethod("text");
     setSelectedFile(null);
@@ -179,14 +203,12 @@ function HomeworkHelper() {
       return;
     }
 
-    const title = generateSessionTitle(originalInput);
-
     if (!user || !user.data) return;
 
     try {
       const session = await createSessionMutation.mutateAsync({
         userId: user.data.id,
-        title,
+        title: sessionTitle, // Use the session name that was set
         subject: detectedSubject,
         inputMethod,
         originalInput,
@@ -194,7 +216,6 @@ function HomeworkHelper() {
       });
 
       setCurrentSessionId(session.id);
-      setSessionTitle(title);
 
       // Update progress for new task
       updateProgressMutation.mutate({
@@ -208,6 +229,7 @@ function HomeworkHelper() {
 
   const loadSession = (sessionId: string) => {
     setCurrentSessionId(sessionId);
+    setIsSessionNameSet(true); // Mark as set when loading existing session
     toast.success("Session loaded! 📖");
   };
 
@@ -232,13 +254,6 @@ function HomeworkHelper() {
       console.error("Error saving message:", error);
       // Don't show error toast for message saving failures as it might be disruptive
     }
-  };
-
-  const generateSessionTitle = (input: string): string => {
-    const truncated =
-      input.length > 50 ? input.substring(0, 50) + "..." : input;
-    const timestamp = new Date().toLocaleDateString();
-    return `${truncated} - ${timestamp}`;
   };
 
   // AI-based subject detection is now handled by the useSubjectDetection hook
@@ -321,6 +336,8 @@ function HomeworkHelper() {
     setSelectedFile(null);
     setTextInput("");
     setSessionTitle("");
+    setSessionName("");
+    setIsSessionNameSet(false);
     toast.success("Ready for a new homework session! ✨");
   };
 
@@ -445,125 +462,168 @@ function HomeworkHelper() {
             <CardHeader>
               <CardTitle>Upload Your Homework 📚</CardTitle>
               <CardDescription>
-                Take a photo or type your question to get started
+                {!isSessionNameSet
+                  ? "First, give your session a name, then take a photo or type your question"
+                  : "Take a photo or type your question to get started"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Input Method Toggle */}
-              <div className="flex gap-2 mb-4">
-                <Button
-                  variant={inputMethod === "photo" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setInputMethod("photo")}
-                  className="flex-1 transition-all duration-300"
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Photo
-                </Button>
-                <Button
-                  variant={inputMethod === "text" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setInputMethod("text")}
-                  className="flex-1 transition-all duration-300"
-                >
-                  <Type className="h-4 w-4 mr-2" />
-                  Text
-                </Button>
-              </div>
-
-              {/* File Upload */}
-              {inputMethod === "photo" && (
-                <FileUpload
-                  onFileSelect={handleFileSelect}
-                  onFileRemove={handleFileRemove}
-                  selectedFile={selectedFile}
-                />
-              )}
-
-              {/* Text Input */}
-              {inputMethod === "text" && (
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="Type or paste your homework question here... 🤔"
-                    value={textInput}
-                    onChange={(e) => setTextInput(e.target.value)}
-                    className="min-h-[120px] resize-none"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleTextSubmit();
-                      }
-                    }}
-                  />
-                  <Button
-                    onClick={handleTextSubmit}
-                    disabled={!textInput.trim()}
-                    className="w-full"
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    Submit Question
-                  </Button>
+              {/* Session Name Input */}
+              {!isSessionNameSet && (
+                <div className="space-y-2 p-4 bg-muted/50 rounded-lg border-2 border-dashed border-muted-foreground/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Session Name</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter session name (e.g., Math Homework - Chapter 5)"
+                      value={sessionName}
+                      onChange={(e) => setSessionName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSessionNameSubmit();
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleSessionNameSubmit}
+                      disabled={!sessionName.trim()}
+                      size="sm"
+                    >
+                      Set Name
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Give your homework session a descriptive name to help you
+                    find it later
+                  </p>
                 </div>
               )}
 
-              {/* Subject Detection */}
-              {isDetecting && (
-                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                  <RefreshCw className="h-4 w-4 text-primary animate-spin" />
-                  <span className="text-sm">AI is detecting subject...</span>
-                </div>
-              )}
-              {detectedSubject && !isDetecting && (
-                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <span className="text-sm">AI detected subject:</span>
-                  <Badge variant="secondary">
-                    {detectedSubject.charAt(0).toUpperCase() +
-                      detectedSubject.slice(1)}
-                  </Badge>
-                </div>
-              )}
+              {/* Input Method Toggle - Only show after session name is set */}
+              {isSessionNameSet && (
+                <>
+                  <div className="flex gap-2 mb-4">
+                    <Button
+                      variant={inputMethod === "photo" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setInputMethod("photo")}
+                      className="flex-1 transition-all duration-300"
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Photo
+                    </Button>
+                    <Button
+                      variant={inputMethod === "text" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setInputMethod("text")}
+                      className="flex-1 transition-all duration-300"
+                    >
+                      <Type className="h-4 w-4 mr-2" />
+                      Text
+                    </Button>
+                  </div>
 
-              {/* Action Buttons */}
-              {messages.length > 0 && (
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleModeSelect("hint")}
-                    disabled={isProcessing || isStreaming}
-                    className="hover:border-yellow-500 disabled:opacity-50"
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Get Hint 💡
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleModeSelect("concept")}
-                    disabled={isProcessing || isStreaming}
-                    className="hover:border-blue-500 disabled:opacity-50"
-                  >
-                    <Brain className="h-4 w-4 mr-2" />
-                    Learn Concept 🧠
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleModeSelect("practice")}
-                    disabled={isProcessing || isStreaming}
-                    className="hover:border-green-500 disabled:opacity-50"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Practice 🔄
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleModeSelect("quiz")}
-                    disabled={isProcessing || isStreaming}
-                    className="hover:border-rose-500 disabled:opacity-50"
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Take Quiz ✅
-                  </Button>
-                </div>
+                  {/* File Upload */}
+                  {inputMethod === "photo" && (
+                    <FileUpload
+                      onFileSelect={handleFileSelect}
+                      onFileRemove={handleFileRemove}
+                      selectedFile={selectedFile}
+                    />
+                  )}
+
+                  {/* Text Input */}
+                  {inputMethod === "text" && (
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder="Type or paste your homework question here... 🤔"
+                        value={textInput}
+                        onChange={(e) => setTextInput(e.target.value)}
+                        className="min-h-[120px] resize-none"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleTextSubmit();
+                          }
+                        }}
+                      />
+                      <Button
+                        onClick={handleTextSubmit}
+                        disabled={!textInput.trim()}
+                        className="w-full"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Submit Question
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Subject Detection */}
+                  {isDetecting && (
+                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                      <RefreshCw className="h-4 w-4 text-primary animate-spin" />
+                      <span className="text-sm">
+                        AI is detecting subject...
+                      </span>
+                    </div>
+                  )}
+                  {detectedSubject && !isDetecting && (
+                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span className="text-sm">AI detected subject:</span>
+                      <Badge variant="secondary">
+                        {detectedSubject.charAt(0).toUpperCase() +
+                          detectedSubject.slice(1)}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  {messages.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleModeSelect("hint")}
+                        disabled={isProcessing || isStreaming}
+                        className="hover:border-yellow-500 disabled:opacity-50"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Get Hint 💡
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleModeSelect("concept")}
+                        disabled={isProcessing || isStreaming}
+                        className="hover:border-blue-500 disabled:opacity-50"
+                      >
+                        <Brain className="h-4 w-4 mr-2" />
+                        Learn Concept 🧠
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleModeSelect("practice")}
+                        disabled={isProcessing || isStreaming}
+                        className="hover:border-green-500 disabled:opacity-50"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Practice 🔄
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleModeSelect("quiz")}
+                        disabled={isProcessing || isStreaming}
+                        className="hover:border-rose-500 disabled:opacity-50"
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Take Quiz ✅
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -573,8 +633,9 @@ function HomeworkHelper() {
             <CardHeader>
               <CardTitle>Your Learning Journey 🎯</CardTitle>
               <CardDescription>
-                I'm here to guide you, not give you answers! Your progress is
-                saved automatically.
+                {!isSessionNameSet
+                  ? "Set a session name to start your learning journey!"
+                  : "I'm here to guide you, not give you answers! Your progress is saved automatically."}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden p-0">

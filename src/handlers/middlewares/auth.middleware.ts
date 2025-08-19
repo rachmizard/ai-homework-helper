@@ -6,10 +6,6 @@ export const authMiddleware = createMiddleware({ type: "function" }).server(
   async (ctx) => {
     const { userId } = await getAuth(getWebRequest()!);
 
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
-
     return ctx.next({
       context: {
         userId,
@@ -17,17 +13,3 @@ export const authMiddleware = createMiddleware({ type: "function" }).server(
     });
   }
 );
-
-export const serverAuthMiddleware = createMiddleware({
-  type: "request",
-}).server(async (ctx) => {
-  const { userId } = await getAuth(getWebRequest()!);
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-  return ctx.next({
-    context: {
-      userId,
-    },
-  });
-});

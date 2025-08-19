@@ -12,24 +12,28 @@ import { authMiddleware } from "./middlewares/auth.middleware";
 export const generateHintSchema = z.object({
   question: z.string().min(1, "Question is required"),
   subject: z.enum(["math", "science", "writing", "summary"]),
+  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
   extractedText: z.string().optional(),
 });
 
 export const generateConceptSchema = z.object({
   question: z.string().min(1, "Question is required"),
   subject: z.enum(["math", "science", "writing", "summary"]),
+  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
   extractedText: z.string().optional(),
 });
 
 export const generatePracticeSchema = z.object({
   question: z.string().min(1, "Question is required"),
   subject: z.enum(["math", "science", "writing", "summary"]),
+  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
   extractedText: z.string().optional(),
 });
 
 export const generateQuizSchema = z.object({
   question: z.string().min(1, "Question is required"),
   subject: z.enum(["math", "science", "writing", "summary"]),
+  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
   extractedText: z.string().optional(),
 });
 
@@ -49,28 +53,32 @@ const SYSTEM_PROMPTS = {
     Keep hints to 1-2 sentences, use encouraging language, and include relevant emojis.
     Focus on the next logical step or key concept needed to progress.
     Never solve the problem completely - only guide towards the solution.
-    Use a tone that feels supportive and teen-friendly.`,
+    Use a tone that feels supportive and teen-friendly.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     science: `You are a friendly AI tutor helping middle and high school students with science homework.
     Your role is to provide strategic HINTS that guide students to understand scientific concepts without giving complete answers.
     Keep hints to 1-2 sentences, use encouraging language, and include relevant emojis.
     Focus on scientific method, key principles, or observation techniques.
     Never provide full explanations - only guide towards understanding.
-    Use a tone that feels supportive and teen-friendly.`,
+    Use a tone that feels supportive and teen-friendly.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     writing: `You are a friendly AI tutor helping middle and high school students with writing assignments.
     Your role is to provide strategic HINTS for essay structure, brainstorming, or writing techniques without writing for them.
     Keep hints to 1-2 sentences, use encouraging language, and include relevant emojis.
     Focus on writing strategies, organization tips, or brainstorming approaches.
     Never write content for them - only guide their thinking process.
-    Use a tone that feels supportive and teen-friendly.`,
+    Use a tone that feels supportive and teen-friendly.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     summary: `You are a friendly AI tutor helping middle and high school students with text summarization.
     Your role is to provide strategic HINTS for identifying main ideas and key points without summarizing for them.
     Keep hints to 1-2 sentences, use encouraging language, and include relevant emojis.
     Focus on reading strategies, identification techniques, or structural analysis.
     Never provide the summary - only guide their analytical thinking.
-    Use a tone that feels supportive and teen-friendly.`,
+    Use a tone that feels supportive and teen-friendly.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
 
   concept: {
@@ -78,25 +86,29 @@ const SYSTEM_PROMPTS = {
     Explain the underlying concept or technique in 2-3 sentences with analogies and emojis.
     Focus on WHY the method works and help students understand the reasoning.
     Use relatable analogies (like balance scales, puzzles, etc.) to make concepts clear.
-    Keep explanations accessible and encouraging.`,
+    Keep explanations accessible and encouraging.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     science: `You are a friendly AI tutor explaining scientific concepts to middle and high school students.
     Explain the underlying scientific principle in 2-3 sentences with analogies and emojis.
     Focus on WHY things work the way they do and help students understand the reasoning.
     Use relatable analogies and real-world examples to make concepts clear.
-    Keep explanations accessible and encouraging.`,
+    Keep explanations accessible and encouraging.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     writing: `You are a friendly AI tutor explaining writing concepts to middle and high school students.
     Explain the underlying writing technique or principle in 2-3 sentences with analogies and emojis.
     Focus on WHY certain approaches work and help students understand good writing.
     Use relatable analogies (like building blocks, storytelling, etc.) to make concepts clear.
-    Keep explanations accessible and encouraging.`,
+    Keep explanations accessible and encouraging.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     summary: `You are a friendly AI tutor explaining summarization techniques to middle and high school students.
     Explain the underlying concept of effective summarization in 2-3 sentences with analogies and emojis.
     Focus on WHY certain approaches work for identifying and condensing main ideas.
     Use relatable analogies (like extracting juice, finding treasures, etc.) to make concepts clear.
-    Keep explanations accessible and encouraging.`,
+    Keep explanations accessible and encouraging.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
 
   practice: {
@@ -104,25 +116,29 @@ const SYSTEM_PROMPTS = {
     Generate 1 similar but different practice problem based on the original question.
     Make the problem at the same difficulty level but with different numbers/variables.
     Provide encouraging instructions and remind them to use what they just learned.
-    Keep the tone fun and supportive with emojis.`,
+    Keep the tone fun and supportive with emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     science: `You are a friendly AI tutor creating practice activities for middle and high school students.
     Generate 1 similar practice task or thought experiment based on the original question.
     Make it at the same difficulty level but with different context or variables.
     Provide encouraging instructions and remind them to apply the concepts they learned.
-    Keep the tone fun and supportive with emojis.`,
+    Keep the tone fun and supportive with emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     writing: `You are a friendly AI tutor creating writing practice for middle and high school students.
     Generate 1 similar writing task or outline exercise based on the original prompt.
     Make it at the same difficulty level but with different topic or angle.
     Provide encouraging instructions and remind them to use the techniques they learned.
-    Keep the tone fun and supportive with emojis.`,
+    Keep the tone fun and supportive with emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     summary: `You are a friendly AI tutor creating summarization practice for middle and high school students.
     Generate 1 short passage (100-200 words) for them to practice summarizing.
     Make it age-appropriate and interesting, similar in complexity to their original task.
     Provide encouraging instructions and remind them to use the strategies they learned.
-    Keep the tone fun and supportive with emojis.`,
+    Keep the tone fun and supportive with emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
 
   quiz: {
@@ -130,25 +146,29 @@ const SYSTEM_PROMPTS = {
     Create 1 multiple-choice question that tests understanding of the concept from their homework.
     Include 4 options (A, B, C, D) with 1 correct answer.
     Focus on testing conceptual understanding, not just calculation.
-    Keep the tone encouraging and use emojis.`,
+    Keep the tone encouraging and use emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     science: `You are a friendly AI tutor creating quiz questions for middle and high school students.
     Create 1 multiple-choice question that tests understanding of the scientific concept.
     Include 4 options (A, B, C, D) with 1 correct answer.
     Focus on testing conceptual understanding and scientific thinking.
-    Keep the tone encouraging and use emojis.`,
+    Keep the tone encouraging and use emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     writing: `You are a friendly AI tutor creating quiz questions for middle and high school students.
     Create 1 multiple-choice question that tests understanding of the writing concept or technique.
     Include 4 options (A, B, C, D) with 1 correct answer.
     Focus on testing understanding of writing principles and strategies.
-    Keep the tone encouraging and use emojis.`,
+    Keep the tone encouraging and use emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
 
     summary: `You are a friendly AI tutor creating quiz questions for middle and high school students.
     Create 1 multiple-choice question that tests understanding of summarization techniques.
     Include 4 options (A, B, C, D) with 1 correct answer.
     Focus on testing understanding of main idea identification and condensation strategies.
-    Keep the tone encouraging and use emojis.`,
+    Keep the tone encouraging and use emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
 
   subjectDetection: `Analyze the following text and determine the primary academic subject.
@@ -168,7 +188,7 @@ export const generateHint = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const completion = await createChatCompletion({
@@ -202,7 +222,7 @@ export const generateHintStream = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const stream = await createStreamingChatCompletion({
@@ -242,7 +262,7 @@ export const generateConcept = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const completion = await createChatCompletion({
@@ -276,7 +296,7 @@ export const generateConceptStream = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const stream = await createStreamingChatCompletion({
@@ -316,7 +336,7 @@ export const generatePractice = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const completion = await createChatCompletion({
@@ -350,7 +370,7 @@ export const generatePracticeStream = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const stream = await createStreamingChatCompletion({
@@ -390,7 +410,7 @@ export const generateQuiz = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const completion = await createChatCompletion({
@@ -424,7 +444,7 @@ export const generateQuizStream = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, subject, extractedText } = data;
+      const { question, subject, language, extractedText } = data;
       const inputText = extractedText || question;
 
       const stream = await createStreamingChatCompletion({
