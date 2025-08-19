@@ -367,7 +367,7 @@ export default function ChatInterface({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="min-h-[80px] max-h-[120px] resize-none"
+              className="min-h-[80px] max-h-[120px] resize-none placeholder:text-xs md:placeholder:text-md"
               disabled={isStreaming}
             />
             <Button
@@ -406,7 +406,7 @@ function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}>
       {!isUser && (
-        <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
+        <div className="flex h-4 w-4 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
           <Bot className="h-4 w-4" />
         </div>
       )}
