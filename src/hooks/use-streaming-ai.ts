@@ -136,15 +136,9 @@ export function useStreamingAI(): UseStreamingAIResult {
 
 // Subject detection hook
 export const useSubjectDetection = () => {
-  const [detectedSubject, setDetectedSubject] = useState<Subject | null>(null);
-
   const detectSubjectMutation = useMutation({
     mutationFn: async (text: string) => {
       return await detectSubjectAI({ data: { text } });
-    },
-    onSuccess: (data) => {
-      setDetectedSubject(data.subject);
-      toast.success(`Detected subject: ${data.subject} 🎯`);
     },
     onError: (error) => {
       console.log({
@@ -152,8 +146,6 @@ export const useSubjectDetection = () => {
       });
       console.error("Subject detection error:", error);
       toast.error("Failed to detect subject. Using default.");
-      // Fall back to default subject
-      setDetectedSubject("math");
     },
   });
 
@@ -167,11 +159,11 @@ export const useSubjectDetection = () => {
   );
 
   const resetSubject = useCallback(() => {
-    setDetectedSubject(null);
-  }, []);
+    detectSubjectMutation.reset();
+  }, [detectSubjectMutation]);
 
   return {
-    detectedSubject,
+    detectedSubject: detectSubjectMutation.data?.subject || "math",
     isDetecting: detectSubjectMutation.isPending,
     detectSubject,
     resetSubject,

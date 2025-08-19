@@ -1,21 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Brain,
-  Camera,
   CheckCircle2,
-  RefreshCw,
-  Send,
-  Sparkles,
-  Type,
   History,
-  Save,
   Plus,
+  RefreshCw,
+  Save,
+  Sparkles,
+  Trash,
 } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import Aurora from "~/components/backgrounds/Aurora/Aurora";
 import { ChatInterface, ChatMessage } from "~/components/chat-interface";
-import { FileUpload } from "~/components/file-upload";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -25,8 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Textarea } from "~/components/ui/textarea";
-import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -35,20 +30,27 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import {
-  useChatSessions,
-  useChatSession,
-  useCreateChatSession,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import {
   useAddChatMessage,
-  useUpdateUserProgress,
-  useUpdateSessionTitle,
+  useChatSession,
+  useChatSessions,
+  useCreateChatSession,
+  useDeleteChatSession,
   useEndChatSession,
+  useUpdateSessionTitle,
+  useUpdateUserProgress,
 } from "~/hooks/use-chat-history";
-import { useUser } from "~/hooks/use-user";
 import {
   useStreamingAI,
-  type StreamingMode,
   useSubjectDetection,
+  type StreamingMode,
 } from "~/hooks/use-streaming-ai";
+import { useUser } from "~/hooks/use-user";
 import { useGetChatSession, useSetChatSession } from "~/store/chat-session";
 
 export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
@@ -90,11 +92,14 @@ function HomeworkHelper() {
   const setCurrentSessionId = useSetChatSession();
 
   const [sessionTitle, setSessionTitle] = React.useState("");
+  const [isSessionTitleSubmitted, setIsSessionTitleSubmitted] =
+    React.useState(false);
 
   // TanStack Query hooks
   const { data: userSessions, isLoading: loadingSessions } = useChatSessions();
   const { data: currentSessionData } = useChatSession(currentSessionId);
   const createSessionMutation = useCreateChatSession();
+  const deleteSessionMutation = useDeleteChatSession();
   const addMessageMutation = useAddChatMessage();
   const updateProgressMutation = useUpdateUserProgress();
   const updateTitleMutation = useUpdateSessionTitle();
@@ -117,6 +122,7 @@ function HomeworkHelper() {
   React.useEffect(() => {
     if (currentSessionData?.title) {
       setSessionTitle(currentSessionData.title);
+      setIsSessionTitleSubmitted(true);
     }
   }, [currentSessionData?.title]);
 
@@ -126,6 +132,7 @@ function HomeworkHelper() {
       return;
     }
     setSessionTitle(sessionTitle);
+    setIsSessionTitleSubmitted(true);
     toast.success("Session name set! You can now start your homework session.");
   };
 
@@ -211,11 +218,6 @@ function HomeworkHelper() {
     resetStream();
 
     try {
-      // Use the detected subject or default to writing for general responses
-      // Map "chat" to "writing" for database compatibility
-      const subject =
-        (detectedSubject === "chat" ? "writing" : detectedSubject) || "writing";
-
       // Convert chat messages to the format expected by the AI
       const conversationHistory = messages.map((msg) => ({
         role: msg.type as "user" | "assistant",
@@ -225,7 +227,7 @@ function HomeworkHelper() {
       // Start streaming AI response with conversation history
       await startStream("chat" as StreamingMode, {
         question: message,
-        subject: subject,
+        subject: currentSessionData?.subject || "writing",
         messages: conversationHistory,
       });
 
@@ -334,14 +336,14 @@ function HomeworkHelper() {
   };
 
   const handleModeSelect = async (mode: Mode) => {
-    if (!detectedSubject || !currentQuestion) return;
+    if (!currentSessionData?.subject || !currentQuestion) return;
 
     setIsProcessing(true);
 
     try {
       // Update progress
       updateProgressMutation.mutate({
-        subject: detectedSubject as "math" | "science" | "writing" | "summary",
+        subject: currentSessionData?.subject,
         action: mode as "hint" | "concept" | "practice" | "quiz" | "task",
       });
 
@@ -380,22 +382,6 @@ function HomeworkHelper() {
       toast.error("Something went wrong. Please try again.");
     }
   };
-
-  // Handle stream completion - add final message to chat
-  React.useEffect(() => {
-    if (streamingContent && streamingType && !isStreaming) {
-      // Save to database - the UI will update automatically via React Query
-      if (currentSessionId) {
-        saveChatMessage("assistant", streamingContent, streamingType as Mode);
-      }
-
-      // Reset streaming state
-      setTimeout(() => {
-        resetStream();
-      }, 1000);
-    }
-  }, [isStreaming, streamingContent, streamingType, currentSessionId]);
-
   const handleNewSession = () => {
     setCurrentSessionId(null);
     resetSubject();
@@ -403,6 +389,9 @@ function HomeworkHelper() {
     setSelectedFile(null);
     setTextInput("");
     setSessionTitle("");
+    setCurrentQuestion("");
+    setExtractedText("");
+    resetSubject();
     toast.success("Ready for a new homework session! ✨");
   };
 
@@ -420,6 +409,21 @@ function HomeworkHelper() {
       console.error("Error saving session:", error);
     }
   };
+
+  // Handle stream completion - add final message to chat
+  React.useEffect(() => {
+    if (streamingContent && streamingType && !isStreaming) {
+      // Save to database - the UI will update automatically via React Query
+      if (currentSessionId) {
+        saveChatMessage("assistant", streamingContent, streamingType as Mode);
+      }
+
+      // Reset streaming state
+      setTimeout(() => {
+        resetStream();
+      }, 1000);
+    }
+  }, [isStreaming, streamingContent, streamingType, currentSessionId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
@@ -481,31 +485,68 @@ function HomeworkHelper() {
             )}
           </div>
 
-          {userSessions && userSessions.length > 0 && (
-            <Select
-              value={currentSessionId || undefined}
-              onValueChange={loadSession}
-              disabled={loadingSessions}
-            >
-              <SelectTrigger className="w-[300px]">
-                <SelectValue
-                  placeholder={
-                    loadingSessions ? "Loading..." : "Load previous session..."
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {userSessions.map((session) => (
-                  <SelectItem key={session.id} value={session.id}>
-                    <div className="flex items-center gap-2">
-                      <History className="h-4 w-4" />
-                      <span className="truncate">{session.title}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <div className="flex items-center gap-2">
+            {currentSessionId && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        deleteSessionMutation.mutate(currentSessionId, {
+                          onSuccess: () => {
+                            setCurrentSessionId(null);
+                            setCurrentQuestion("");
+                            setExtractedText("");
+                            setTextInput("");
+                            setSelectedFile(null);
+                            setInputMethod(null);
+                            setSessionTitle("");
+                            resetSubject();
+                            toast.success("Session deleted! 💾");
+                          },
+                        })
+                      }
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete Session</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
+            {userSessions && userSessions.length > 0 && (
+              <Select
+                value={currentSessionId || undefined}
+                onValueChange={loadSession}
+                disabled={loadingSessions}
+              >
+                <SelectTrigger className="w-[300px]">
+                  <SelectValue
+                    placeholder={
+                      loadingSessions
+                        ? "Loading..."
+                        : "Load previous session..."
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {userSessions.map((session) => (
+                    <SelectItem key={session.id} value={session.id}>
+                      <div className="flex items-center gap-2">
+                        <History className="h-4 w-4" />
+                        <span className="truncate">{session.title}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
 
         {currentSessionData && (
@@ -523,212 +564,95 @@ function HomeworkHelper() {
         )}
       </div>
 
-      {/* Main Interface */}
+      {/* Enhanced Chat Interface */}
       <div className="container mx-auto px-4 pb-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Input Section */}
-          <Card className="hover:shadow-xl transition-shadow duration-300">
-            <CardHeader>
-              <CardTitle>Upload Your Homework 📚</CardTitle>
-              <CardDescription>
-                {!sessionTitle
-                  ? "First, give your session a name, then take a photo or type your question"
-                  : "Take a photo or type your question to get started"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Session Name Input */}
-              {!sessionTitle && (
-                <div className="space-y-2 p-4 bg-muted/50 rounded-lg border-2 border-dashed border-muted-foreground/20">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Session Name</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter session name (e.g., Math Homework - Chapter 5)"
-                      value={sessionTitle}
-                      onChange={(e) => setSessionTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleSessionNameSubmit();
-                        }
-                      }}
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={handleSessionNameSubmit}
-                      disabled={!sessionTitle.trim()}
-                      size="sm"
-                    >
-                      Set Name
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Give your homework session a descriptive name to help you
-                    find it later
-                  </p>
+        <Card className="flex-1 flex flex-col hover:shadow-xl transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle>Your Learning Journey 🎯</CardTitle>
+            <CardDescription>
+              {!sessionTitle
+                ? "Set a session name to start your learning journey!"
+                : "I'm here to guide you! Ask questions, have conversations, and get help. Your progress is saved automatically."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden p-0">
+            <ChatInterface
+              messages={messages}
+              className="h-full"
+              streamingMessage={
+                isStreaming && streamingContent && streamingType
+                  ? {
+                      content: streamingContent,
+                      type: streamingType,
+                      isComplete: false,
+                    }
+                  : undefined
+              }
+              onSendMessage={handleDirectChatMessage}
+              isStreaming={isStreaming}
+              showInput={!!sessionTitle && messages.length > 0}
+              // Enhanced props for integrated input functionality
+              sessionTitle={sessionTitle}
+              onSessionTitleChange={setSessionTitle}
+              onSessionTitleSubmit={handleSessionNameSubmit}
+              inputMethod={inputMethod}
+              onInputMethodChange={setInputMethod}
+              selectedFile={selectedFile}
+              onFileSelect={handleFileSelect}
+              onFileRemove={handleFileRemove}
+              textInput={textInput}
+              onTextInputChange={setTextInput}
+              onTextSubmit={handleTextSubmit}
+              isDetecting={isDetecting}
+              detectedSubject={detectedSubject}
+              isSessionTitleSubmitted={isSessionTitleSubmitted}
+            />
+
+            {/* Action Buttons */}
+            {messages.length > 0 && (
+              <div className="p-4 border-t bg-muted/30">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleModeSelect("hint")}
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-yellow-500 disabled:opacity-50"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Ask for Hint 💡
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleModeSelect("concept")}
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-blue-500 disabled:opacity-50"
+                  >
+                    <Brain className="h-4 w-4 mr-2" />
+                    Learn Concepts 🧠
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleModeSelect("practice")}
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-green-500 disabled:opacity-50"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Get Practice 🔄
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleModeSelect("quiz")}
+                    disabled={isProcessing || isStreaming}
+                    className="hover:border-rose-500 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Take Quiz ✅
+                  </Button>
                 </div>
-              )}
-
-              {/* Input Method Toggle - Only show after session name is set */}
-              {sessionTitle && (
-                <>
-                  <div className="flex gap-2 mb-4">
-                    <Button
-                      variant={inputMethod === "photo" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setInputMethod("photo")}
-                      className="flex-1 transition-all duration-300"
-                    >
-                      <Camera className="h-4 w-4 mr-2" />
-                      Photo
-                    </Button>
-                    <Button
-                      variant={inputMethod === "text" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setInputMethod("text")}
-                      className="flex-1 transition-all duration-300"
-                    >
-                      <Type className="h-4 w-4 mr-2" />
-                      Text
-                    </Button>
-                  </div>
-
-                  {/* File Upload */}
-                  {inputMethod === "photo" && (
-                    <FileUpload
-                      onFileSelect={handleFileSelect}
-                      onFileRemove={handleFileRemove}
-                      selectedFile={selectedFile}
-                    />
-                  )}
-
-                  {/* Text Input */}
-                  {inputMethod === "text" && (
-                    <div className="space-y-2">
-                      <Textarea
-                        placeholder="Type or paste your homework question here... 🤔"
-                        value={textInput}
-                        onChange={(e) => setTextInput(e.target.value)}
-                        className="min-h-[120px] resize-none"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleTextSubmit();
-                          }
-                        }}
-                      />
-                      <Button
-                        onClick={handleTextSubmit}
-                        disabled={!textInput.trim()}
-                        className="w-full"
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        Submit Question
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Subject Detection */}
-                  {isDetecting && (
-                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                      <RefreshCw className="h-4 w-4 text-primary animate-spin" />
-                      <span className="text-sm">
-                        AI is detecting subject...
-                      </span>
-                    </div>
-                  )}
-                  {detectedSubject && !isDetecting && (
-                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      <span className="text-sm">AI detected subject:</span>
-                      <Badge variant="secondary">
-                        {detectedSubject.charAt(0).toUpperCase() +
-                          detectedSubject.slice(1)}
-                      </Badge>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Chat Interface */}
-          <Card className="h-[900px] flex flex-col hover:shadow-xl transition-shadow duration-300">
-            <CardHeader>
-              <CardTitle>Your Learning Journey 🎯</CardTitle>
-              <CardDescription>
-                {!sessionTitle
-                  ? "Set a session name to start your learning journey!"
-                  : "I'm here to guide you! Ask questions, have conversations, and get help. Your progress is saved automatically."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-hidden p-0">
-              <ChatInterface
-                messages={messages}
-                className="h-full"
-                streamingMessage={
-                  isStreaming && streamingContent && streamingType
-                    ? {
-                        content: streamingContent,
-                        type: streamingType,
-                        isComplete: false,
-                      }
-                    : undefined
-                }
-                onSendMessage={handleDirectChatMessage}
-                isStreaming={isStreaming}
-                showInput={!!sessionTitle && messages.length > 0}
-              />
-
-              {/* Action Buttons */}
-              {messages.length > 0 && (
-                <div className="p-4 border-t bg-muted/30">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleModeSelect("hint")}
-                      disabled={isProcessing || isStreaming}
-                      className="hover:border-yellow-500 disabled:opacity-50"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Ask for Hint 💡
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleModeSelect("concept")}
-                      disabled={isProcessing || isStreaming}
-                      className="hover:border-blue-500 disabled:opacity-50"
-                    >
-                      <Brain className="h-4 w-4 mr-2" />
-                      Learn Concepts 🧠
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleModeSelect("practice")}
-                      disabled={isProcessing || isStreaming}
-                      className="hover:border-green-500 disabled:opacity-50"
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Get Practice 🔄
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleModeSelect("quiz")}
-                      disabled={isProcessing || isStreaming}
-                      className="hover:border-rose-500 disabled:opacity-50"
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                      Take Quiz ✅
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

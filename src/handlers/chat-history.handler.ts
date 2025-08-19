@@ -375,3 +375,32 @@ export const endChatSession = createServerFn({ method: "POST" })
       throw new Error("Failed to end chat session");
     }
   });
+
+export const deleteChatSession = createServerFn({ method: "POST" })
+  .validator((sessionId: string) => sessionId)
+  .middleware([authMiddleware])
+  .handler(async ({ data: sessionId }) => {
+    const user = await getUser();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    try {
+      const [deletedSession] = await db
+        .delete(chatSessions)
+        .where(
+          and(eq(chatSessions.id, sessionId), eq(chatSessions.userId, user.id))
+        )
+        .returning();
+
+      if (!deletedSession) {
+        throw new Error("Session not found");
+      }
+
+      return deletedSession;
+    } catch (error) {
+      console.error("Error deleting chat session:", error);
+      throw new Error("Failed to delete chat session");
+    }
+  });

@@ -1,23 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type {
+  ChatSessionWithMessages,
+  NewChatMessage,
+  NewChatSession,
+} from "~/db/schema";
 import {
-  createChatSession,
   addChatMessage,
-  updateUserProgress,
-  getUserChatSessions,
-  getChatSessionWithMessages,
-  updateSessionTitle,
+  createChatSession,
+  deleteChatSession,
   endChatSession,
+  getChatSessionWithMessages,
+  getUserChatSessions,
   getUserProgressSummary,
+  updateSessionTitle,
+  updateUserProgress,
 } from "~/handlers/chat-history.handler";
 import { queryKeys } from "~/lib/query-client";
-import type {
-  ChatSession,
-  ChatSessionWithMessages,
-  NewChatSession,
-  NewChatMessage,
-  UserProgressSummary,
-} from "~/db/schema";
 
 // Hook to fetch user's chat sessions
 export function useChatSessions() {
@@ -246,6 +245,27 @@ export function useEndChatSession() {
     onError: (error) => {
       console.error("Error ending session:", error);
       toast.error("Failed to save session");
+    },
+  });
+}
+
+// Hook to delete a chat session
+export function useDeleteChatSession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (sessionId: string) => {
+      return await deleteChatSession({ data: sessionId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.chatSessions,
+      });
+      toast.success("Session deleted! 💾");
+    },
+    onError: (error) => {
+      console.error("Error deleting session:", error);
+      toast.error("Failed to delete session");
     },
   });
 }
