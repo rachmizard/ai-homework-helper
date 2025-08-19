@@ -36,7 +36,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { InputMethodEnum, SubjectEnum } from "~/db";
+import { InputMethodEnum, ModeEnum, SubjectEnum } from "~/db";
 import {
   useAddChatMessage,
   useChatSession,
@@ -54,6 +54,7 @@ import {
 } from "~/hooks/use-streaming-ai";
 import { useUser } from "~/hooks/use-user";
 import { useGetChatSession, useSetChatSession } from "~/store/chat-session";
+
 // Lazy load heavy background component
 const Aurora = React.lazy(
   () => import("~/components/backgrounds/Aurora/Aurora")
@@ -66,7 +67,7 @@ export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
   component: HomeworkHelper,
 });
 
-type Mode = "hint" | "concept" | "practice" | "quiz" | "chat";
+type Mode = ModeEnum;
 
 function HomeworkHelper() {
   const user = useUser();

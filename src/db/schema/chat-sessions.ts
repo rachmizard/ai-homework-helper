@@ -24,6 +24,7 @@ export const inputMethodEnum = pgEnum("input_method", ["photo", "text"]);
 
 export type SubjectEnum = (typeof subjectEnum.enumValues)[number];
 export type InputMethodEnum = (typeof inputMethodEnum.enumValues)[number];
+export type ModeEnum = "hint" | "concept" | "practice" | "quiz" | "chat";
 
 // Chat sessions table - represents a homework session
 export const chatSessions = pgTable("chat_sessions", {

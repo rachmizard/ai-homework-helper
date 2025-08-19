@@ -24,7 +24,7 @@ import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 import AnimatedContent from "./animations/AnimatedContent/AnimatedContent";
-import { InputMethodEnum } from "~/db";
+import { InputMethodEnum, ModeEnum } from "~/db";
 
 export type MessageType = "user" | "assistant";
 
@@ -33,7 +33,7 @@ export interface ChatMessage {
   type: MessageType;
   content: string;
   timestamp: Date;
-  mode?: "hint" | "concept" | "practice" | "quiz" | "chat";
+  mode?: ModeEnum;
   isStreaming?: boolean;
   isComplete?: boolean;
 }
@@ -43,7 +43,7 @@ interface ChatInterfaceProps {
   className?: string;
   streamingMessage?: {
     content: string;
-    type: "hint" | "concept" | "practice" | "quiz" | "chat";
+    type: ModeEnum;
     isComplete: boolean;
   };
   onSendMessage?: (message: string) => void;

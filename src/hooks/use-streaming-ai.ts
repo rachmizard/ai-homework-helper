@@ -1,14 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { SubjectEnum } from "~/db";
+import { ModeEnum, SubjectEnum } from "~/db";
 import {
   detectSubjectAI,
   GenerateChatSchema,
   generateChatStream,
 } from "~/handlers/homework-ai.handler";
 
-export type StreamingMode = "hint" | "concept" | "practice" | "quiz" | "chat";
+export type StreamingMode = ModeEnum;
 
 export interface StreamingResponse {
   content: string;
