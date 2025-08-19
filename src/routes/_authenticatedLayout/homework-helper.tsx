@@ -370,7 +370,7 @@ function HomeworkHelper() {
           />
         </div>
 
-        <div className="container mx-auto px-4 pt-8 pb-4 relative z-10">
+        <div className="container mx-auto px-4 pt-8 pb-4 relative z-0">
           <div className="text-center mb-6">
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
