@@ -4,6 +4,7 @@ import type {
   ChatSessionWithMessages,
   NewChatMessage,
   NewChatSession,
+  SubjectEnum,
 } from "~/db/schema";
 import {
   addChatMessage,
@@ -152,7 +153,7 @@ export function useUpdateUserProgress() {
 
   return useMutation({
     mutationFn: async (data: {
-      subject: "math" | "science" | "writing" | "summary";
+      subject: SubjectEnum;
       action: "task" | "hint" | "concept" | "practice" | "quiz";
     }) => {
       return await updateUserProgress({ data });

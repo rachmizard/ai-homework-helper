@@ -36,6 +36,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { SubjectEnum } from "~/db";
 import {
   useAddChatMessage,
   useChatSession,
@@ -65,7 +66,6 @@ export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
   component: HomeworkHelper,
 });
 
-type Subject = "math" | "science" | "writing" | "summary" | "chat";
 type Mode = "hint" | "concept" | "practice" | "quiz" | "chat";
 
 function HomeworkHelper() {
@@ -248,7 +248,7 @@ function HomeworkHelper() {
       // Start streaming AI response with conversation history
       await startStream("chat" as StreamingMode, {
         question: message,
-        subject: currentSessionData?.subject || "writing",
+        language: "en",
         messages: conversationHistory,
       });
 
@@ -267,7 +267,7 @@ function HomeworkHelper() {
   }: {
     originalInput: string;
     inputMethod: "photo" | "text";
-    subject: Subject;
+    subject: SubjectEnum;
   }) => {
     // Wait for AI detection to complete if it's still in progress
     if (isDetecting) {
@@ -356,7 +356,7 @@ function HomeworkHelper() {
     try {
       // Update progress
       updateProgressMutation.mutate({
-        subject: currentSessionData?.subject,
+        subject: currentSessionData?.subject as SubjectEnum,
         action: mode as "hint" | "concept" | "practice" | "quiz" | "task",
       });
 
@@ -384,7 +384,7 @@ function HomeworkHelper() {
       }
       await startStream(mode as StreamingMode, {
         question: currentQuestion,
-        subject: detectedSubject,
+        language: "en",
         extractedText: extractedText || undefined,
         messages: [...messages, userMessage].map((msg) => ({
           role: msg.type as "user" | "assistant",

@@ -6,6 +6,7 @@ import {
   chatSessions,
   insertChatMessageSchema,
   insertChatSessionSchema,
+  SubjectEnum,
   userProgress,
   type ChatMessage,
   type ChatSessionWithMessages,
@@ -160,7 +161,7 @@ export const addChatMessage = createServerFn({ method: "POST" })
 export const updateUserProgress = createServerFn({ method: "POST" })
   .validator(
     (data: {
-      subject: "math" | "science" | "writing" | "summary";
+      subject: SubjectEnum;
       action: "task" | "hint" | "concept" | "practice" | "quiz";
     }) => data
   )

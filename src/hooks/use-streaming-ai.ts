@@ -1,17 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { SubjectEnum } from "~/db";
 import {
   detectSubjectAI,
+  GenerateChatSchema,
   generateChatStream,
 } from "~/handlers/homework-ai.handler";
 
 export type StreamingMode = "hint" | "concept" | "practice" | "quiz" | "chat";
-export type Subject = "math" | "science" | "writing" | "summary" | "chat";
 
 export interface StreamingResponse {
   content: string;
-  subject: Subject;
+  subject: SubjectEnum;
   type: StreamingMode;
   done?: boolean;
 }
@@ -23,24 +24,14 @@ export interface UseStreamingAIResult {
   error: string | null;
   startStream: (
     mode: StreamingMode,
-    params: {
-      question: string;
-      subject: Subject;
-      extractedText?: string;
-      messages?: Array<{ role: "user" | "assistant"; content: string }>;
-    }
+    params: GenerateChatSchema
   ) => Promise<void>;
   resetStream: () => void;
 }
 
 const useChatMutation = () => {
   return useMutation({
-    mutationFn: async (data: {
-      question: string;
-      subject: Subject;
-      extractedText?: string;
-      messages?: Array<{ role: "user" | "assistant"; content: string }>;
-    }) => {
+    mutationFn: async (data: GenerateChatSchema) => {
       return await generateChatStream({
         data,
       });
@@ -65,15 +56,7 @@ export function useStreamingAI(): UseStreamingAIResult {
   }, []);
 
   const startStream = useCallback(
-    async (
-      mode: StreamingMode,
-      params: {
-        question: string;
-        subject: Subject;
-        extractedText?: string;
-        messages?: Array<{ role: "user" | "assistant"; content: string }>;
-      }
-    ) => {
+    async (mode: StreamingMode, params: GenerateChatSchema) => {
       setIsStreaming(true);
       setStreamingContent("");
       setStreamingType(mode);

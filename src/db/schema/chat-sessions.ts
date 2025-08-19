@@ -16,7 +16,11 @@ export const subjectEnum = pgEnum("subject", [
   "science",
   "writing",
   "summary",
+  "programming",
+  "other",
 ]);
+
+export type SubjectEnum = (typeof subjectEnum.enumValues)[number];
 
 // Enum for input methods
 export const inputMethodEnum = pgEnum("input_method", ["photo", "text"]);
