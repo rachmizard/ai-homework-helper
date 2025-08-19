@@ -36,7 +36,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { SubjectEnum } from "~/db";
+import { InputMethodEnum, SubjectEnum } from "~/db";
 import {
   useAddChatMessage,
   useChatSession,
@@ -80,7 +80,7 @@ function HomeworkHelper() {
     detectSubject: detectSubjectAI,
     resetSubject,
   } = useSubjectDetection();
-  const [inputMethod, setInputMethod] = React.useState<"photo" | "text" | null>(
+  const [inputMethod, setInputMethod] = React.useState<InputMethodEnum | null>(
     null
   );
   const [currentQuestion, setCurrentQuestion] = React.useState<string>("");
@@ -266,7 +266,7 @@ function HomeworkHelper() {
     subject,
   }: {
     originalInput: string;
-    inputMethod: "photo" | "text";
+    inputMethod: InputMethodEnum;
     subject: SubjectEnum;
   }) => {
     // Wait for AI detection to complete if it's still in progress

@@ -24,6 +24,7 @@ import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 import AnimatedContent from "./animations/AnimatedContent/AnimatedContent";
+import { InputMethodEnum } from "~/db";
 
 export type MessageType = "user" | "assistant";
 
@@ -52,8 +53,8 @@ interface ChatInterfaceProps {
   sessionTitle?: string;
   onSessionTitleChange?: (value: string) => void;
   onSessionTitleSubmit?: () => void;
-  inputMethod?: "photo" | "text" | null;
-  onInputMethodChange?: (method: "photo" | "text" | null) => void;
+  inputMethod?: InputMethodEnum | null;
+  onInputMethodChange?: (method: InputMethodEnum | null) => void;
   selectedFile?: File | null;
   onFileSelect?: (file: File) => void;
   onFileRemove?: () => void;

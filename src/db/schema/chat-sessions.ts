@@ -20,10 +20,10 @@ export const subjectEnum = pgEnum("subject", [
   "other",
 ]);
 
-export type SubjectEnum = (typeof subjectEnum.enumValues)[number];
-
-// Enum for input methods
 export const inputMethodEnum = pgEnum("input_method", ["photo", "text"]);
+
+export type SubjectEnum = (typeof subjectEnum.enumValues)[number];
+export type InputMethodEnum = (typeof inputMethodEnum.enumValues)[number];
 
 // Chat sessions table - represents a homework session
 export const chatSessions = pgTable("chat_sessions", {

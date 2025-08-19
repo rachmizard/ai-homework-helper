@@ -23,6 +23,7 @@ import {
 } from "~/components/ui/card";
 import { Textarea } from "~/components/ui/textarea";
 import type { ChatMessage } from "~/components/chat-interface";
+import { InputMethodEnum } from "~/db";
 
 const ChatInterface = React.lazy(() => import("~/components/chat-interface"));
 
@@ -39,7 +40,7 @@ function HomeworkHelper() {
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [detectedSubject, setDetectedSubject] = React.useState<Subject>(null);
-  const [inputMethod, setInputMethod] = React.useState<"photo" | "text" | null>(
+  const [inputMethod, setInputMethod] = React.useState<InputMethodEnum | null>(
     null
   );
 
