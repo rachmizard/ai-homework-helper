@@ -56,6 +56,7 @@ import {
 import { useUser } from "~/hooks/use-user";
 import { useGetChatSession, useSetChatSession } from "~/store/chat-session";
 import type { ChatMessage } from "~/components/chat-interface";
+import { Spinner } from "~/components/ui/spinner";
 
 // Lazy load the chat interface component
 const ChatInterface = React.lazy(() => import("~/components/chat-interface"));
@@ -449,7 +450,7 @@ function HomeworkHelper() {
         <div className="absolute top-0 left-0 right-0 bottom-0 opacity-20 z-0">
           <Suspense
             fallback={
-              <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-blue-500/20" />
+              <Spinner className="w-full h-full bg-gradient-to-br from-purple-500/20 to-blue-500/20" />
             }
           >
             <Aurora
@@ -607,13 +608,7 @@ function HomeworkHelper() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-hidden p-0">
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center h-full">
-                  Loading chat interface...
-                </div>
-              }
-            >
+            <Suspense fallback={<Spinner className="w-full h-full" />}>
               <ChatInterface
                 messages={messages}
                 className="h-full"

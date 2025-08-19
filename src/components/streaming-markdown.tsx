@@ -17,9 +17,7 @@ interface StreamingMarkdownProps {
 
 export const StreamingMarkdown: React.FC<StreamingMarkdownProps> = ({
   content,
-  isComplete = false,
   className,
-  showCursor = true,
 }) => {
   return (
     <div className={cn("relative", className)}>
@@ -205,9 +203,6 @@ export const StreamingMarkdown: React.FC<StreamingMarkdownProps> = ({
       >
         {content}
       </ReactMarkdown>
-      {!isComplete && showCursor && (
-        <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse" />
-      )}
     </div>
   );
 };
