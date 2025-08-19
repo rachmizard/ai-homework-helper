@@ -1,16 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import {
-  generateConceptStream,
-  generateHintStream,
-  generatePracticeStream,
-  generateQuizStream,
   detectSubjectAI,
+  generateChatStream,
 } from "~/handlers/homework-ai.handler";
 
-export type StreamingMode = "hint" | "concept" | "practice" | "quiz";
-export type Subject = "math" | "science" | "writing" | "summary";
+export type StreamingMode = "hint" | "concept" | "practice" | "quiz" | "chat";
+export type Subject = "math" | "science" | "writing" | "summary" | "chat";
 
 export interface StreamingResponse {
   content: string;
@@ -30,61 +27,21 @@ export interface UseStreamingAIResult {
       question: string;
       subject: Subject;
       extractedText?: string;
+      messages?: Array<{ role: "user" | "assistant"; content: string }>;
     }
   ) => Promise<void>;
   resetStream: () => void;
 }
 
-const useHintMutation = () => {
+const useChatMutation = () => {
   return useMutation({
     mutationFn: async (data: {
       question: string;
       subject: Subject;
       extractedText?: string;
+      messages?: Array<{ role: "user" | "assistant"; content: string }>;
     }) => {
-      return await generateHintStream({
-        data,
-      });
-    },
-  });
-};
-
-const useConceptMutation = () => {
-  return useMutation({
-    mutationFn: async (data: {
-      question: string;
-      subject: Subject;
-      extractedText?: string;
-    }) => {
-      return await generateConceptStream({
-        data,
-      });
-    },
-  });
-};
-
-const usePracticeMutation = () => {
-  return useMutation({
-    mutationFn: async (data: {
-      question: string;
-      subject: Subject;
-      extractedText?: string;
-    }) => {
-      return await generatePracticeStream({
-        data,
-      });
-    },
-  });
-};
-
-const useQuizMutation = () => {
-  return useMutation({
-    mutationFn: async (data: {
-      question: string;
-      subject: Subject;
-      extractedText?: string;
-    }) => {
-      return await generateQuizStream({
+      return await generateChatStream({
         data,
       });
     },
@@ -98,10 +55,7 @@ export function useStreamingAI(): UseStreamingAIResult {
     null
   );
   const [error, setError] = useState<string | null>(null);
-  const hintMutation = useHintMutation();
-  const conceptMutation = useConceptMutation();
-  const practiceMutation = usePracticeMutation();
-  const quizMutation = useQuizMutation();
+  const chatMutation = useChatMutation();
 
   const resetStream = useCallback(() => {
     setIsStreaming(false);
@@ -117,6 +71,7 @@ export function useStreamingAI(): UseStreamingAIResult {
         question: string;
         subject: Subject;
         extractedText?: string;
+        messages?: Array<{ role: "user" | "assistant"; content: string }>;
       }
     ) => {
       setIsStreaming(true);
@@ -126,23 +81,12 @@ export function useStreamingAI(): UseStreamingAIResult {
 
       try {
         let response: {
-          hint?: string;
-          concept?: string;
-          practice?: string;
-          quiz?: string;
+          chat?: string;
         } = {};
 
-        if (mode === "hint") {
-          response = await hintMutation.mutateAsync(params);
-        } else if (mode === "concept") {
-          response = await conceptMutation.mutateAsync(params);
-        } else if (mode === "practice") {
-          response = await practiceMutation.mutateAsync(params);
-        } else if (mode === "quiz") {
-          response = await quizMutation.mutateAsync(params);
-        }
+        response = await chatMutation.mutateAsync(params);
 
-        const result = response[mode];
+        const result = response.chat;
 
         const fullText = result || "";
 
@@ -217,7 +161,7 @@ export const useSubjectDetection = () => {
     async (text: string) => {
       if (!text.trim()) return;
 
-      await detectSubjectMutation.mutateAsync(text);
+      return await detectSubjectMutation.mutateAsync(text);
     },
     [detectSubjectMutation]
   );

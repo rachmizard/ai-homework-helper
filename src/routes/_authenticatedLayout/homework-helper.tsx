@@ -49,19 +49,19 @@ import {
   type StreamingMode,
   useSubjectDetection,
 } from "~/hooks/use-streaming-ai";
+import { useGetChatSession, useSetChatSession } from "~/store/chat-session";
 
 export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
   component: HomeworkHelper,
 });
 
-type Subject = "math" | "science" | "writing" | "summary";
-type Mode = "hint" | "concept" | "practice" | "quiz";
+type Subject = "math" | "science" | "writing" | "summary" | "chat";
+type Mode = "hint" | "concept" | "practice" | "quiz" | "chat";
 
 function HomeworkHelper() {
   const user = useUser();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [textInput, setTextInput] = React.useState("");
-  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
   // AI-based subject detection
   const {
@@ -76,10 +76,6 @@ function HomeworkHelper() {
   const [currentQuestion, setCurrentQuestion] = React.useState<string>("");
   const [extractedText, setExtractedText] = React.useState<string>("");
 
-  // Session name state
-  const [sessionName, setSessionName] = React.useState("");
-  const [isSessionNameSet, setIsSessionNameSet] = React.useState(false);
-
   // Streaming AI hook
   const {
     isStreaming,
@@ -90,9 +86,9 @@ function HomeworkHelper() {
   } = useStreamingAI();
 
   // Chat session management
-  const [currentSessionId, setCurrentSessionId] = React.useState<string | null>(
-    null
-  );
+  const currentSessionId = useGetChatSession();
+  const setCurrentSessionId = useSetChatSession();
+
   const [sessionTitle, setSessionTitle] = React.useState("");
 
   // TanStack Query hooks
@@ -104,37 +100,37 @@ function HomeworkHelper() {
   const updateTitleMutation = useUpdateSessionTitle();
   const endSessionMutation = useEndChatSession();
 
-  // Update messages when session data changes
+  // Derive messages directly from currentSessionData
+  const messages: ChatMessage[] = React.useMemo(() => {
+    if (!currentSessionData?.messages) return [];
+
+    return currentSessionData.messages.map((msg: any) => ({
+      id: msg.id,
+      type: msg.type as "user" | "assistant",
+      content: msg.content,
+      timestamp: new Date(msg.createdAt),
+      mode: msg.mode as Mode | undefined,
+    }));
+  }, [currentSessionData?.messages]);
+
+  // Update session title when currentSessionData changes
   React.useEffect(() => {
-    if (currentSessionData && currentSessionData.messages) {
-      const chatMessages: ChatMessage[] = currentSessionData.messages.map(
-        (msg: any) => ({
-          id: msg.id,
-          type: msg.type as "user" | "assistant",
-          content: msg.content,
-          timestamp: new Date(msg.createdAt),
-          mode: msg.mode as Mode | undefined,
-        })
-      );
-      setMessages(chatMessages);
+    if (currentSessionData?.title) {
       setSessionTitle(currentSessionData.title);
-      // Note: We don't set detectedSubject here as it's managed by the AI detection hook
-      // The subject will be detected when the user interacts with the content
     }
-  }, [currentSessionData]);
+  }, [currentSessionData?.title]);
 
   const handleSessionNameSubmit = () => {
-    if (!sessionName.trim()) {
+    if (!sessionTitle.trim()) {
       toast.error("Please enter a session name");
       return;
     }
-    setIsSessionNameSet(true);
-    setSessionTitle(sessionName);
+    setSessionTitle(sessionTitle);
     toast.success("Session name set! You can now start your homework session.");
   };
 
   const handleFileSelect = async (file: File) => {
-    if (!isSessionNameSet) {
+    if (!sessionTitle) {
       toast.error("Please set a session name first");
       return;
     }
@@ -152,9 +148,14 @@ function HomeworkHelper() {
       await detectSubjectAI(mockExtractedText);
 
       // Create new session if none exists
-      if (!currentSessionId) {
-        await createNewSession(mockExtractedText, "photo");
-      }
+      // TODO: Will be updated later
+      // if (!currentSessionId) {
+      //   await createNewSession({
+      //     originalInput: mockExtractedText,
+      //     inputMethod: "photo",
+      //     subject: detectedSubject,
+      //   });
+      // }
     }, 1000);
   };
 
@@ -165,7 +166,7 @@ function HomeworkHelper() {
 
   const handleTextSubmit = async () => {
     if (!textInput.trim()) return;
-    if (!isSessionNameSet) {
+    if (!sessionTitle) {
       toast.error("Please set a session name first");
       return;
     }
@@ -175,32 +176,80 @@ function HomeworkHelper() {
     setCurrentQuestion(textInput);
     setExtractedText("");
     addMessageToChat("user", textInput);
-    await detectSubjectAI(textInput);
+    const subjectResponse = await detectSubjectAI(textInput);
+
+    if (!subjectResponse?.subject) {
+      toast.error("Failed to detect subject. Please try again.");
+      return;
+    }
 
     // Create new session if none exists
     if (!currentSessionId) {
-      await createNewSession(textInput, "text");
+      await createNewSession({
+        originalInput: textInput,
+        inputMethod: "text",
+        subject: subjectResponse?.subject,
+      });
     } else {
       // Add message to existing session
       await saveChatMessage("user", textInput);
     }
-
-    setTextInput("");
   };
 
-  const createNewSession = async (
-    originalInput: string,
-    inputMethod: "photo" | "text"
-  ) => {
+  const handleDirectChatMessage = async (message: string) => {
+    if (!message.trim() || !sessionTitle) return;
+
+    // Add user message to chat
+    addMessageToChat("user", message);
+    await saveChatMessage("user", message);
+
+    // Update current question context for AI responses
+    setCurrentQuestion(message);
+
+    // Generate AI response using the current context
+    setIsProcessing(true);
+    resetStream();
+
+    try {
+      // Use the detected subject or default to writing for general responses
+      // Map "chat" to "writing" for database compatibility
+      const subject =
+        (detectedSubject === "chat" ? "writing" : detectedSubject) || "writing";
+
+      // Convert chat messages to the format expected by the AI
+      const conversationHistory = messages.map((msg) => ({
+        role: msg.type as "user" | "assistant",
+        content: msg.content,
+      }));
+
+      // Start streaming AI response with conversation history
+      await startStream("chat" as StreamingMode, {
+        question: message,
+        subject: subject,
+        messages: conversationHistory,
+      });
+
+      setIsProcessing(false);
+    } catch (error) {
+      console.error("Error handling direct chat message:", error);
+      setIsProcessing(false);
+      toast.error("Something went wrong. Please try again.");
+    }
+  };
+
+  const createNewSession = async ({
+    originalInput,
+    inputMethod,
+    subject,
+  }: {
+    originalInput: string;
+    inputMethod: "photo" | "text";
+    subject: Subject;
+  }) => {
     // Wait for AI detection to complete if it's still in progress
     if (isDetecting) {
       // Wait a bit for detection to complete
       await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-
-    if (!detectedSubject) {
-      toast.error("Subject detection failed. Please try again.");
-      return;
     }
 
     if (!user || !user.data) return;
@@ -209,7 +258,7 @@ function HomeworkHelper() {
       const session = await createSessionMutation.mutateAsync({
         userId: user.data.id,
         title: sessionTitle, // Use the session name that was set
-        subject: detectedSubject,
+        subject: subject as "math" | "science" | "writing" | "summary",
         inputMethod,
         originalInput,
         extractedText: inputMethod === "photo" ? originalInput : null,
@@ -219,7 +268,7 @@ function HomeworkHelper() {
 
       // Update progress for new task
       updateProgressMutation.mutate({
-        subject: detectedSubject,
+        subject: subject as "math" | "science" | "writing" | "summary",
         action: "task",
       });
     } catch (error) {
@@ -229,7 +278,6 @@ function HomeworkHelper() {
 
   const loadSession = (sessionId: string) => {
     setCurrentSessionId(sessionId);
-    setIsSessionNameSet(true); // Mark as set when loading existing session
     toast.success("Session loaded! 📖");
   };
 
@@ -263,34 +311,66 @@ function HomeworkHelper() {
     content: string,
     mode?: Mode
   ) => {
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      type,
-      content,
-      timestamp: new Date(),
-      mode,
+    // This function is now only used for optimistic updates
+    // The actual messages are derived from currentSessionData
+    // We'll rely on the React Query cache to update the UI
+  };
+
+  // Template messages for different modes
+  const getTemplateMessage = (mode: Mode): string => {
+    const questionContext = currentQuestion
+      ? `\n\n**My question/topic:** ${currentQuestion}`
+      : "";
+
+    const templates = {
+      hint: `💡 **Hint Request**${questionContext}\n\nI need a helpful hint to guide me through this problem without giving away the complete answer. Can you provide a strategic hint that will help me think through this step by step?`,
+      concept: `🧠 **Concept Learning Request**${questionContext}\n\nI'd like to understand the underlying concepts and principles related to this topic. Can you explain the key concepts in a clear and engaging way?`,
+      practice: `🔄 **Practice Request**${questionContext}\n\nI want to practice and reinforce my knowledge. Can you give me a practice problem or exercise related to this topic so I can test my understanding?`,
+      quiz: `✅ **Quiz Request**${questionContext}\n\nI'm ready to test my knowledge! Can you create a short quiz with questions related to this topic to help me assess my understanding?`,
+      chat: `💬 **Chat Conversation**${questionContext}\n\nLet's have a conversation about this topic. I'm ready to discuss, ask questions, and learn more through our chat!`,
     };
-    setMessages((prev) => [...prev, newMessage]);
+
+    return templates[mode];
   };
 
   const handleModeSelect = async (mode: Mode) => {
     if (!detectedSubject || !currentQuestion) return;
 
     setIsProcessing(true);
-    resetStream();
 
     try {
       // Update progress
       updateProgressMutation.mutate({
-        subject: detectedSubject,
-        action: mode,
+        subject: detectedSubject as "math" | "science" | "writing" | "summary",
+        action: mode as "hint" | "concept" | "practice" | "quiz" | "task",
       });
 
-      // Start streaming AI response
+      // Get template message
+      const templateMessage = getTemplateMessage(mode);
+
+      // Add user message with template
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        type: "user",
+        content: templateMessage,
+        timestamp: new Date(),
+        mode,
+      };
+
+      // Save user message to database first
+      if (currentSessionId) {
+        saveChatMessage("user", templateMessage, mode);
+      }
+
+      resetStream();
       await startStream(mode as StreamingMode, {
         question: currentQuestion,
         subject: detectedSubject,
         extractedText: extractedText || undefined,
+        messages: [...messages, userMessage].map((msg) => ({
+          role: msg.type as "user" | "assistant",
+          content: msg.content,
+        })),
       });
 
       setIsProcessing(false);
@@ -304,21 +384,9 @@ function HomeworkHelper() {
   // Handle stream completion - add final message to chat
   React.useEffect(() => {
     if (streamingContent && streamingType && !isStreaming) {
-      // Stream is complete, add the final message to chat
-      const finalMessage: ChatMessage = {
-        id: Date.now().toString(),
-        type: "assistant",
-        content: streamingContent,
-        timestamp: new Date(),
-        mode: streamingType,
-        isComplete: true,
-      };
-
-      setMessages((prev) => [...prev, finalMessage]);
-
-      // Save to database
+      // Save to database - the UI will update automatically via React Query
       if (currentSessionId) {
-        saveChatMessage("assistant", streamingContent, streamingType);
+        saveChatMessage("assistant", streamingContent, streamingType as Mode);
       }
 
       // Reset streaming state
@@ -330,14 +398,11 @@ function HomeworkHelper() {
 
   const handleNewSession = () => {
     setCurrentSessionId(null);
-    setMessages([]);
     resetSubject();
     setInputMethod(null);
     setSelectedFile(null);
     setTextInput("");
     setSessionTitle("");
-    setSessionName("");
-    setIsSessionNameSet(false);
     toast.success("Ready for a new homework session! ✨");
   };
 
@@ -417,7 +482,11 @@ function HomeworkHelper() {
           </div>
 
           {userSessions && userSessions.length > 0 && (
-            <Select onValueChange={loadSession} disabled={loadingSessions}>
+            <Select
+              value={currentSessionId || undefined}
+              onValueChange={loadSession}
+              disabled={loadingSessions}
+            >
               <SelectTrigger className="w-[300px]">
                 <SelectValue
                   placeholder={
@@ -462,14 +531,14 @@ function HomeworkHelper() {
             <CardHeader>
               <CardTitle>Upload Your Homework 📚</CardTitle>
               <CardDescription>
-                {!isSessionNameSet
+                {!sessionTitle
                   ? "First, give your session a name, then take a photo or type your question"
                   : "Take a photo or type your question to get started"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Session Name Input */}
-              {!isSessionNameSet && (
+              {!sessionTitle && (
                 <div className="space-y-2 p-4 bg-muted/50 rounded-lg border-2 border-dashed border-muted-foreground/20">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="h-4 w-4 text-primary" />
@@ -478,8 +547,8 @@ function HomeworkHelper() {
                   <div className="flex gap-2">
                     <Input
                       placeholder="Enter session name (e.g., Math Homework - Chapter 5)"
-                      value={sessionName}
-                      onChange={(e) => setSessionName(e.target.value)}
+                      value={sessionTitle}
+                      onChange={(e) => setSessionTitle(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -490,7 +559,7 @@ function HomeworkHelper() {
                     />
                     <Button
                       onClick={handleSessionNameSubmit}
-                      disabled={!sessionName.trim()}
+                      disabled={!sessionTitle.trim()}
                       size="sm"
                     >
                       Set Name
@@ -504,7 +573,7 @@ function HomeworkHelper() {
               )}
 
               {/* Input Method Toggle - Only show after session name is set */}
-              {isSessionNameSet && (
+              {sessionTitle && (
                 <>
                   <div className="flex gap-2 mb-4">
                     <Button
@@ -581,67 +650,25 @@ function HomeworkHelper() {
                       </Badge>
                     </div>
                   )}
-
-                  {/* Action Buttons */}
-                  {messages.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => handleModeSelect("hint")}
-                        disabled={isProcessing || isStreaming}
-                        className="hover:border-yellow-500 disabled:opacity-50"
-                      >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Get Hint 💡
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleModeSelect("concept")}
-                        disabled={isProcessing || isStreaming}
-                        className="hover:border-blue-500 disabled:opacity-50"
-                      >
-                        <Brain className="h-4 w-4 mr-2" />
-                        Learn Concept 🧠
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleModeSelect("practice")}
-                        disabled={isProcessing || isStreaming}
-                        className="hover:border-green-500 disabled:opacity-50"
-                      >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Practice 🔄
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleModeSelect("quiz")}
-                        disabled={isProcessing || isStreaming}
-                        className="hover:border-rose-500 disabled:opacity-50"
-                      >
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Take Quiz ✅
-                      </Button>
-                    </div>
-                  )}
                 </>
               )}
             </CardContent>
           </Card>
 
           {/* Chat Interface */}
-          <Card className="h-[600px] flex flex-col hover:shadow-xl transition-shadow duration-300">
+          <Card className="h-[900px] flex flex-col hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle>Your Learning Journey 🎯</CardTitle>
               <CardDescription>
-                {!isSessionNameSet
+                {!sessionTitle
                   ? "Set a session name to start your learning journey!"
-                  : "I'm here to guide you, not give you answers! Your progress is saved automatically."}
+                  : "I'm here to guide you! Ask questions, have conversations, and get help. Your progress is saved automatically."}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden p-0">
               <ChatInterface
                 messages={messages}
-                className="h-full overflow-y-auto"
+                className="h-full"
                 streamingMessage={
                   isStreaming && streamingContent && streamingType
                     ? {
@@ -651,7 +678,54 @@ function HomeworkHelper() {
                       }
                     : undefined
                 }
+                onSendMessage={handleDirectChatMessage}
+                isStreaming={isStreaming}
+                showInput={!!sessionTitle && messages.length > 0}
               />
+
+              {/* Action Buttons */}
+              {messages.length > 0 && (
+                <div className="p-4 border-t bg-muted/30">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleModeSelect("hint")}
+                      disabled={isProcessing || isStreaming}
+                      className="hover:border-yellow-500 disabled:opacity-50"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Ask for Hint 💡
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleModeSelect("concept")}
+                      disabled={isProcessing || isStreaming}
+                      className="hover:border-blue-500 disabled:opacity-50"
+                    >
+                      <Brain className="h-4 w-4 mr-2" />
+                      Learn Concepts 🧠
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleModeSelect("practice")}
+                      disabled={isProcessing || isStreaming}
+                      className="hover:border-green-500 disabled:opacity-50"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Get Practice 🔄
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleModeSelect("quiz")}
+                      disabled={isProcessing || isStreaming}
+                      className="hover:border-rose-500 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Take Quiz ✅
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

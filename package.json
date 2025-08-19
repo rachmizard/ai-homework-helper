@@ -70,7 +70,8 @@
     "svix": "^1.73.0",
     "tailwind-merge": "^2.6.0",
     "vaul": "^1.1.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.12",

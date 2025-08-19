@@ -9,40 +9,27 @@ import {
 import { authMiddleware } from "./middlewares/auth.middleware";
 
 // Input validation schemas
-export const generateHintSchema = z.object({
-  question: z.string().min(1, "Question is required"),
-  subject: z.enum(["math", "science", "writing", "summary"]),
-  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
-  extractedText: z.string().optional(),
-});
-
-export const generateConceptSchema = z.object({
-  question: z.string().min(1, "Question is required"),
-  subject: z.enum(["math", "science", "writing", "summary"]),
-  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
-  extractedText: z.string().optional(),
-});
-
-export const generatePracticeSchema = z.object({
-  question: z.string().min(1, "Question is required"),
-  subject: z.enum(["math", "science", "writing", "summary"]),
-  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
-  extractedText: z.string().optional(),
-});
-
-export const generateQuizSchema = z.object({
-  question: z.string().min(1, "Question is required"),
-  subject: z.enum(["math", "science", "writing", "summary"]),
-  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
-  extractedText: z.string().optional(),
-});
-
 export const detectSubjectSchema = z.object({
   text: z.string().min(1, "Text is required"),
 });
 
 export const extractTextFromImageSchema = z.object({
   imageData: z.string().min(1, "Image data is required"),
+});
+
+export const generateChatSchema = z.object({
+  question: z.string().min(1, "Question is required"),
+  subject: z.enum(["math", "science", "writing", "summary", "chat"]),
+  language: z.enum(["en", "id", "de", "es", "fr"]).default("en"),
+  extractedText: z.string().optional(),
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string(),
+      })
+    )
+    .optional(),
 });
 
 // System prompts for different AI functions
@@ -79,6 +66,13 @@ const SYSTEM_PROMPTS = {
     Never provide the summary - only guide their analytical thinking.
     Use a tone that feels supportive and teen-friendly.
     IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
+
+    chat: `You are a friendly AI tutor helping middle and high school students with their homework and learning.
+    Your role is to engage in helpful conversations about their academic questions, provide explanations, and guide their learning process.
+    Be encouraging, supportive, and use a tone that feels teen-friendly with appropriate emojis.
+    You can answer questions, explain concepts, provide examples, and help students understand their subjects better.
+    Always aim to be educational and helpful while maintaining a conversational tone.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
 
   concept: {
@@ -107,6 +101,13 @@ const SYSTEM_PROMPTS = {
     Explain the underlying concept of effective summarization in 2-3 sentences with analogies and emojis.
     Focus on WHY certain approaches work for identifying and condensing main ideas.
     Use relatable analogies (like extracting juice, finding treasures, etc.) to make concepts clear.
+    Keep explanations accessible and encouraging.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
+
+    chat: `You are a friendly AI tutor explaining writing concepts to middle and high school students.
+    Explain the underlying writing technique or principle in 2-3 sentences with analogies and emojis.
+    Focus on WHY certain approaches work and help students understand good writing.
+    Use relatable analogies (like building blocks, storytelling, etc.) to make concepts clear.
     Keep explanations accessible and encouraging.
     IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
@@ -139,6 +140,13 @@ const SYSTEM_PROMPTS = {
     Provide encouraging instructions and remind them to use the strategies they learned.
     Keep the tone fun and supportive with emojis.
     IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
+
+    chat: `You are a friendly AI tutor creating writing practice for middle and high school students.
+    Generate 1 similar writing task or outline exercise based on the original prompt.
+    Make it at the same difficulty level but with different topic or angle.
+    Provide encouraging instructions and remind them to use the techniques they learned.
+    Keep the tone fun and supportive with emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
 
   quiz: {
@@ -169,6 +177,13 @@ const SYSTEM_PROMPTS = {
     Focus on testing understanding of main idea identification and condensation strategies.
     Keep the tone encouraging and use emojis.
     IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
+
+    chat: `You are a friendly AI tutor creating writing practice for middle and high school students.
+    Generate 1 similar writing task or outline exercise based on the original prompt.
+    Make it at the same difficulty level but with different topic or angle.
+    Provide encouraging instructions and remind them to use the techniques they learned.
+    Keep the tone fun and supportive with emojis.
+    IMPORTANT: Always respond in the same language that the user inputs their question. If they ask in Indonesian, respond in Indonesian. If they ask in German, respond in German. If they ask in Spanish, respond in Spanish. If they ask in French, respond in French. If they ask in English, respond in English.`,
   },
 
   subjectDetection: `Analyze the following text and determine the primary academic subject.
@@ -177,306 +192,16 @@ const SYSTEM_PROMPTS = {
   - Science: scientific terms, experiments, phenomena, hypothesis, biology/chemistry/physics concepts
   - Writing: essay prompts, paragraph requests, creative writing, argumentative topics
   - Summary: requests to summarize, condense, or identify main ideas from longer texts
-  
-  Respond with only one word: "math", "science", "writing", or "summary".
+  - Programming: requests to write code, debug, or explain code
+  - History: requests to write history essays, research papers, or discuss historical events
+  - Geography: requests to write geography essays, research papers, or discuss geographical concepts
+  - Economics: requests to write economics essays, research papers, or discuss economic concepts
+  - Social Studies: requests to write social studies essays, research papers, or discuss social studies concepts
+  - English: requests to write English essays, research papers, or discuss English concepts
+  - Other: requests to write other essays, research papers, or discuss other concepts
+  Respond with only one word: "math", "science", "writing", "summary", "programming", "history", "geography", "economics", "social studies", "english", or "other".
   If unclear, default to "math".`,
 };
-
-// Generate hint using OpenAI
-export const generateHint = createServerFn({ method: "POST" })
-  .validator(zodValidator(generateHintSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const completion = await createChatCompletion({
-        ...CHAT_CONFIGS.QUICK,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.hint[subject],
-          },
-          {
-            role: "user",
-            content: `Please provide a helpful hint for this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      const hint =
-        completion.choices[0]?.message?.content ||
-        "I'm having trouble generating a hint right now. Please try again! 🤔";
-
-      return { hint, subject };
-    } catch (error) {
-      console.error("Error generating hint:", error);
-      throw new Error("Failed to generate hint");
-    }
-  });
-
-// Generate hint using OpenAI with streaming
-export const generateHintStream = createServerFn({ method: "POST" })
-  .validator(zodValidator(generateHintSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const stream = await createStreamingChatCompletion({
-        ...CHAT_CONFIGS.QUICK,
-        stream: true,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.hint[subject],
-          },
-          {
-            role: "user",
-            content: `Please provide a helpful hint for this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      // Collect all streaming content
-      let fullContent = "";
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          fullContent += content;
-        }
-      }
-
-      return { hint: fullContent, subject };
-    } catch (error) {
-      console.error("Error generating hint stream:", error);
-      throw new Error("Failed to generate hint stream");
-    }
-  });
-
-// Generate concept explanation using OpenAI
-export const generateConcept = createServerFn({ method: "POST" })
-  .validator(zodValidator(generateConceptSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const completion = await createChatCompletion({
-        ...CHAT_CONFIGS.QUICK,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.concept[subject],
-          },
-          {
-            role: "user",
-            content: `Please explain the underlying concept for this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      const concept =
-        completion.choices[0]?.message?.content ||
-        "I'm having trouble explaining this concept right now. Please try again! 🧠";
-
-      return { concept, subject };
-    } catch (error) {
-      console.error("Error generating concept:", error);
-      throw new Error("Failed to generate concept explanation");
-    }
-  });
-
-// Generate concept explanation using OpenAI with streaming
-export const generateConceptStream = createServerFn({ method: "POST" })
-  .validator(zodValidator(generateConceptSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const stream = await createStreamingChatCompletion({
-        ...CHAT_CONFIGS.QUICK,
-        stream: true,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.concept[subject],
-          },
-          {
-            role: "user",
-            content: `Please explain the underlying concept for this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      // Collect all streaming content
-      let fullContent = "";
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          fullContent += content;
-        }
-      }
-
-      return { concept: fullContent, subject };
-    } catch (error) {
-      console.error("Error generating concept stream:", error);
-      throw new Error("Failed to generate concept stream");
-    }
-  });
-
-// Generate practice problem using OpenAI
-export const generatePractice = createServerFn({ method: "POST" })
-  .validator(zodValidator(generatePracticeSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const completion = await createChatCompletion({
-        ...CHAT_CONFIGS.CREATIVE,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.practice[subject],
-          },
-          {
-            role: "user",
-            content: `Please create a practice problem similar to this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      const practice =
-        completion.choices[0]?.message?.content ||
-        "I'm having trouble creating a practice problem right now. Please try again! 🔄";
-
-      return { practice, subject };
-    } catch (error) {
-      console.error("Error generating practice:", error);
-      throw new Error("Failed to generate practice problem");
-    }
-  });
-
-// Generate practice problem using OpenAI with streaming
-export const generatePracticeStream = createServerFn({ method: "POST" })
-  .validator(zodValidator(generatePracticeSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const stream = await createStreamingChatCompletion({
-        ...CHAT_CONFIGS.CREATIVE,
-        stream: true,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.practice[subject],
-          },
-          {
-            role: "user",
-            content: `Please create a practice problem similar to this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      // Collect all streaming content
-      let fullContent = "";
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          fullContent += content;
-        }
-      }
-
-      return { practice: fullContent, subject };
-    } catch (error) {
-      console.error("Error generating practice stream:", error);
-      throw new Error("Failed to generate practice stream");
-    }
-  });
-
-// Generate quiz question using OpenAI
-export const generateQuiz = createServerFn({ method: "POST" })
-  .validator(zodValidator(generateQuizSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const completion = await createChatCompletion({
-        ...CHAT_CONFIGS.PRECISE,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.quiz[subject],
-          },
-          {
-            role: "user",
-            content: `Please create a quiz question about the concept from this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      const quiz =
-        completion.choices[0]?.message?.content ||
-        "I'm having trouble creating a quiz question right now. Please try again! ✅";
-
-      return { quiz, subject };
-    } catch (error) {
-      console.error("Error generating quiz:", error);
-      throw new Error("Failed to generate quiz question");
-    }
-  });
-
-// Generate quiz question using OpenAI with streaming
-export const generateQuizStream = createServerFn({ method: "POST" })
-  .validator(zodValidator(generateQuizSchema))
-  .middleware([authMiddleware])
-  .handler(async ({ data }) => {
-    try {
-      const { question, subject, language, extractedText } = data;
-      const inputText = extractedText || question;
-
-      const stream = await createStreamingChatCompletion({
-        ...CHAT_CONFIGS.PRECISE,
-        stream: true,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPTS.quiz[subject],
-          },
-          {
-            role: "user",
-            content: `Please create a quiz question about the concept from this ${subject} problem: "${inputText}"`,
-          },
-        ],
-      });
-
-      // Collect all streaming content
-      let fullContent = "";
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          fullContent += content;
-        }
-      }
-
-      return { quiz: fullContent, subject };
-    } catch (error) {
-      console.error("Error generating quiz stream:", error);
-      throw new Error("Failed to generate quiz stream");
-    }
-  });
 
 // Detect subject using OpenAI
 export const detectSubjectAI = createServerFn({ method: "POST" })
@@ -565,5 +290,104 @@ export const extractTextFromImage = createServerFn({ method: "POST" })
     } catch (error) {
       console.error("Error extracting text from image:", error);
       throw new Error("Failed to extract text from image");
+    }
+  });
+
+export const generateChat = createServerFn({ method: "POST" })
+  .validator(zodValidator(generateChatSchema))
+  .middleware([authMiddleware])
+  .handler(async ({ data }) => {
+    try {
+      const { question, subject, language, extractedText, messages } = data;
+      const inputText = extractedText || question;
+
+      // Build messages array with conversation history
+      const conversationMessages: Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }> = [
+        {
+          role: "system",
+          content: SYSTEM_PROMPTS.hint[subject], // Use the chat prompt from hint section
+        },
+      ];
+
+      // Add previous conversation messages if provided
+      if (messages && messages.length > 0) {
+        conversationMessages.push(...messages);
+      }
+
+      // Add the current user message
+      conversationMessages.push({
+        role: "user",
+        content: inputText,
+      });
+
+      const completion = await createChatCompletion({
+        ...CHAT_CONFIGS.CREATIVE,
+        messages: conversationMessages,
+      });
+
+      const chat =
+        completion.choices[0]?.message?.content ||
+        "I'm having trouble responding to your question right now. Please try again! 🤔";
+
+      return { chat, subject };
+    } catch (error) {
+      console.error("Error generating chat:", error);
+      throw new Error("Failed to generate chat");
+    }
+  });
+
+// Generate chat using OpenAI with streaming
+export const generateChatStream = createServerFn({ method: "POST" })
+  .validator(zodValidator(generateChatSchema))
+  .middleware([authMiddleware])
+  .handler(async ({ data }) => {
+    try {
+      const { question, subject, language, extractedText, messages } = data;
+      const inputText = extractedText || question;
+
+      // Build messages array with conversation history
+      const conversationMessages: Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }> = [
+        {
+          role: "system",
+          content: SYSTEM_PROMPTS.hint[subject], // Use the chat prompt from hint section
+        },
+      ];
+
+      // Add previous conversation messages if provided
+      if (messages && messages.length > 0) {
+        conversationMessages.push(...messages);
+      }
+
+      // Add the current user message
+      conversationMessages.push({
+        role: "user",
+        content: inputText,
+      });
+
+      const stream = await createStreamingChatCompletion({
+        ...CHAT_CONFIGS.CREATIVE,
+        stream: true,
+        messages: conversationMessages,
+      });
+
+      // Collect all streaming content
+      let fullContent = "";
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          fullContent += content;
+        }
+      }
+
+      return { chat: fullContent, subject };
+    } catch (error) {
+      console.error("Error generating chat stream:", error);
+      throw new Error("Failed to generate chat stream");
     }
   });
