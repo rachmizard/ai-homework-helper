@@ -40,6 +40,11 @@
   .using-mouse * {
     outline: none !important;
   }
+
+  /* Prevent theme flickering */
+  html:not(.dark):not(.light) {
+    visibility: hidden;
+  }
 }
 
 /*

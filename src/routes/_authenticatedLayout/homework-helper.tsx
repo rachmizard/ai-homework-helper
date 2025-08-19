@@ -12,10 +12,7 @@ import {
 import * as React from "react";
 import { Suspense } from "react";
 import { toast } from "sonner";
-// Lazy load heavy background component
-const Aurora = React.lazy(
-  () => import("~/components/backgrounds/Aurora/Aurora")
-);
+import type { ChatMessage } from "~/components/chat-interface";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -32,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Spinner } from "~/components/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -55,8 +53,10 @@ import {
 } from "~/hooks/use-streaming-ai";
 import { useUser } from "~/hooks/use-user";
 import { useGetChatSession, useSetChatSession } from "~/store/chat-session";
-import type { ChatMessage } from "~/components/chat-interface";
-import { Spinner } from "~/components/ui/spinner";
+// Lazy load heavy background component
+const Aurora = React.lazy(
+  () => import("~/components/backgrounds/Aurora/Aurora")
+);
 
 // Lazy load the chat interface component
 const ChatInterface = React.lazy(() => import("~/components/chat-interface"));
@@ -105,7 +105,8 @@ function HomeworkHelper() {
 
   // TanStack Query hooks
   const { data: userSessions, isLoading: loadingSessions } = useChatSessions();
-  const { data: currentSessionData } = useChatSession(currentSessionId);
+  const { data: currentSessionData, isLoading: isLoadingCurrentSession } =
+    useChatSession(currentSessionId);
   const createSessionMutation = useCreateChatSession();
   const deleteSessionMutation = useDeleteChatSession();
   const addMessageMutation = useAddChatMessage();
@@ -608,42 +609,50 @@ function HomeworkHelper() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-hidden p-0">
-            <Suspense fallback={<Spinner className="w-full h-full" />}>
-              <ChatInterface
-                messages={messages}
-                className="h-full"
-                streamingMessage={
-                  isStreaming && streamingContent && streamingType
-                    ? {
-                        content: streamingContent,
-                        type: streamingType,
-                        isComplete: false,
-                      }
-                    : undefined
-                }
-                onSendMessage={handleDirectChatMessage}
-                isStreaming={isStreaming}
-                showInput={!!isSessionTitleSubmitted && messages.length > 0}
-                // Enhanced props for integrated input functionality
-                sessionTitle={sessionTitle}
-                onSessionTitleChange={setSessionTitle}
-                onSessionTitleSubmit={handleSessionNameSubmit}
-                inputMethod={inputMethod}
-                onInputMethodChange={setInputMethod}
-                selectedFile={selectedFile}
-                onFileSelect={handleFileSelect}
-                onFileRemove={handleFileRemove}
-                textInput={textInput}
-                onTextInputChange={setTextInput}
-                onTextSubmit={handleTextSubmit}
-                isDetecting={isDetecting}
-                detectedSubject={detectedSubject}
-                isSessionTitleSubmitted={isSessionTitleSubmitted}
-              />
-            </Suspense>
+            {isLoadingCurrentSession && (
+              <div className="flex items-center justify-center h-full my-4">
+                <Spinner className="w-full h-full" />
+              </div>
+            )}
+
+            {!isLoadingCurrentSession && (
+              <Suspense fallback={<Spinner className="w-full h-full" />}>
+                <ChatInterface
+                  messages={messages}
+                  className="h-full"
+                  streamingMessage={
+                    isStreaming && streamingContent && streamingType
+                      ? {
+                          content: streamingContent,
+                          type: streamingType,
+                          isComplete: false,
+                        }
+                      : undefined
+                  }
+                  onSendMessage={handleDirectChatMessage}
+                  isStreaming={isStreaming}
+                  showInput={!!isSessionTitleSubmitted && messages.length > 0}
+                  // Enhanced props for integrated input functionality
+                  sessionTitle={sessionTitle}
+                  onSessionTitleChange={setSessionTitle}
+                  onSessionTitleSubmit={handleSessionNameSubmit}
+                  inputMethod={inputMethod}
+                  onInputMethodChange={setInputMethod}
+                  selectedFile={selectedFile}
+                  onFileSelect={handleFileSelect}
+                  onFileRemove={handleFileRemove}
+                  textInput={textInput}
+                  onTextInputChange={setTextInput}
+                  onTextSubmit={handleTextSubmit}
+                  isDetecting={isDetecting}
+                  detectedSubject={detectedSubject}
+                  isSessionTitleSubmitted={isSessionTitleSubmitted}
+                />
+              </Suspense>
+            )}
 
             {/* Action Buttons */}
-            {messages.length > 0 && (
+            {messages.length > 0 && !isLoadingCurrentSession && (
               <div className="p-4 border-t bg-muted/30">
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   <Button

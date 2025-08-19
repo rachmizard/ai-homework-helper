@@ -102,7 +102,7 @@ export function useStreamingAI(): UseStreamingAIResult {
             currentIndex = nextIndex;
 
             // Variable delay to simulate natural typing
-            const delay = Math.random() * 20 + 15;
+            const delay = Math.random() * 10 + 10;
             setTimeout(streamText, delay);
           } else {
             setIsStreaming(false);

@@ -14,6 +14,7 @@ const StreamingMarkdown = React.lazy(() =>
     default: module.StreamingMarkdown,
   }))
 );
+
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -22,6 +23,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
+import AnimatedContent from "./animations/AnimatedContent/AnimatedContent";
 
 export type MessageType = "user" | "assistant";
 
@@ -113,27 +115,27 @@ export default function ChatInterface({
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-center p-8 text-center h-full",
+          "flex flex-col items-center justify-center p-4 sm:p-8 text-center h-full min-h-0",
           className
         )}
       >
-        <div className="max-w-md w-full space-y-6">
-          <Bot className="h-12 w-12 text-muted-foreground mx-auto" />
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">
+        <div className="w-full max-w-md space-y-4 sm:space-y-6">
+          <Bot className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto" />
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-semibold">
               Start Your Learning Journey! 🚀
             </h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Give your homework session a descriptive name to get started
             </p>
 
             {/* Session Name Input */}
-            <div className="space-y-2 p-4 bg-muted/50 rounded-lg border-2 border-dashed border-muted-foreground/20">
+            <div className="space-y-2 p-3 sm:p-4 bg-muted/50 rounded-lg border-2 border-dashed border-muted-foreground/20">
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-4 w-4 text-primary" />
+                <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
                 <span className="text-sm font-medium">Session Name</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   placeholder="Enter session name (e.g., Math Homework - Chapter 5)"
                   value={sessionTitle || ""}
@@ -144,12 +146,13 @@ export default function ChatInterface({
                       onSessionTitleSubmit?.();
                     }
                   }}
-                  className="flex-1"
+                  className="flex-1 text-sm"
                 />
                 <Button
                   onClick={onSessionTitleSubmit}
                   disabled={!sessionTitle?.trim()}
                   size="sm"
+                  className="sm:self-end"
                 >
                   Set Name
                 </Button>
@@ -170,39 +173,39 @@ export default function ChatInterface({
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-center p-8 text-center h-full",
+          "flex flex-col items-center justify-center p-4 sm:p-8 text-center h-full min-h-0",
           className
         )}
       >
-        <div className="max-w-md w-full space-y-6">
-          <Bot className="h-12 w-12 text-muted-foreground mx-auto" />
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">
+        <div className="w-full max-w-md space-y-4 sm:space-y-6">
+          <Bot className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto" />
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-semibold">
               How would you like to start? 📚
             </h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Choose how you'd like to input your homework question
             </p>
 
             {/* Input Method Toggle */}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => onInputMethodChange?.("photo")}
-                className="flex-1 transition-all duration-300 h-16"
+                className="flex-1 transition-all duration-300 h-14 sm:h-16"
               >
-                <Camera className="h-5 w-5 mr-2" />
-                Photo
+                <Camera className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Photo</span>
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => onInputMethodChange?.("text")}
-                className="flex-1 transition-all duration-300 h-16"
+                className="flex-1 transition-all duration-300 h-14 sm:h-16"
               >
-                <Type className="h-5 w-5 mr-2" />
-                Text
+                <Type className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Text</span>
               </Button>
             </div>
           </div>
@@ -216,14 +219,14 @@ export default function ChatInterface({
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-center p-8 text-center h-full",
+          "flex flex-col items-center justify-center p-4 sm:p-8 text-center h-full min-h-0",
           className
         )}
       >
-        <div className="max-w-md w-full space-y-6">
-          <Bot className="h-12 w-12 text-muted-foreground mx-auto" />
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">
+        <div className="w-full max-w-md space-y-4 sm:space-y-6">
+          <Bot className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto" />
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-semibold">
               {inputMethod === "photo"
                 ? "Upload Your Homework Photo 📸"
                 : "Type Your Question 🤔"}
@@ -231,7 +234,7 @@ export default function ChatInterface({
 
             {/* File Upload */}
             {inputMethod === "photo" && onFileSelect && onFileRemove && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <FileUpload
                   onFileSelect={onFileSelect}
                   onFileRemove={onFileRemove}
@@ -250,13 +253,13 @@ export default function ChatInterface({
 
             {/* Text Input */}
             {inputMethod === "text" && onTextInputChange && onTextSubmit && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
                   <Textarea
                     placeholder="Type or paste your homework question here... 🤔"
                     value={textInput || ""}
                     onChange={(e) => onTextInputChange?.(e.target.value)}
-                    className="min-h-[120px] resize-none"
+                    className="min-h-[100px] sm:min-h-[120px] resize-none text-sm"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
@@ -269,7 +272,7 @@ export default function ChatInterface({
                     disabled={!(textInput || "").trim()}
                     className="w-full"
                   >
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-4 w-4 mr-2 flex-shrink-0" />
                     Submit Question
                   </Button>
                 </div>
@@ -287,15 +290,17 @@ export default function ChatInterface({
             {/* Subject Detection */}
             {isDetecting && (
               <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                <RefreshCw className="h-4 w-4 text-primary animate-spin" />
-                <span className="text-sm">AI is detecting subject...</span>
+                <RefreshCw className="h-4 w-4 text-primary animate-spin flex-shrink-0" />
+                <span className="text-xs sm:text-sm">
+                  AI is detecting subject...
+                </span>
               </div>
             )}
             {detectedSubject && !isDetecting && (
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-sm">AI detected subject:</span>
-                <Badge variant="secondary">
+              <div className="flex flex-wrap items-center gap-2 p-3 bg-muted rounded-lg">
+                <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+                <span className="text-xs sm:text-sm">AI detected subject:</span>
+                <Badge variant="secondary" className="text-xs">
                   {detectedSubject.charAt(0).toUpperCase() +
                     detectedSubject.slice(1)}
                 </Badge>
@@ -308,49 +313,55 @@ export default function ChatInterface({
   }
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn("flex flex-col h-full min-h-0", className)}>
       {/* Messages Container */}
-      <ScrollArea className="flex-1 p-4 space-y-4">
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 p-2 sm:p-4">
+        <div className="space-y-3 sm:space-y-4">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))}
 
           {/* Streaming message */}
           {streamingMessage && (
-            <div className="flex gap-3 justify-start">
-              <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Bot className="h-4 w-4" />
+            <div className="flex gap-2 sm:gap-3 justify-start">
+              <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
               </div>
-              <Card className="max-w-[80%] px-4 py-3 bg-muted">
-                <Suspense fallback={<div className="text-sm">Loading...</div>}>
-                  <StreamingMarkdown
-                    content={streamingMessage.content}
-                    isComplete={streamingMessage.isComplete}
-                    className="text-sm"
-                  />
-                </Suspense>
-                {!streamingMessage.isComplete && (
-                  <div className="flex items-center gap-1 mt-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+              <AnimatedContent>
+                <Card className="max-w-[85%] sm:max-w-[80%] px-3 py-2 sm:px-4 sm:py-3 bg-muted">
+                  <Suspense
+                    fallback={
+                      <div className="text-xs sm:text-sm">Loading...</div>
+                    }
+                  >
+                    <StreamingMarkdown
+                      content={streamingMessage.content}
+                      isComplete={streamingMessage.isComplete}
+                      className="text-xs sm:text-sm"
+                    />
+                  </Suspense>
+                  {!streamingMessage.isComplete && (
+                    <div className="flex items-center gap-1 mt-2">
+                      <div className="flex space-x-1">
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce" />
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        AI is thinking...
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground ml-2">
-                      AI is thinking...
-                    </span>
-                  </div>
-                )}
-                {streamingMessage.isComplete && (
-                  <p className="text-xs mt-1 text-muted-foreground">
-                    {new Date().toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                )}
-              </Card>
+                  )}
+                  {streamingMessage.isComplete && (
+                    <p className="text-xs mt-1 text-muted-foreground">
+                      {new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  )}
+                </Card>
+              </AnimatedContent>
             </div>
           )}
         </div>
@@ -360,23 +371,24 @@ export default function ChatInterface({
 
       {/* Input Section */}
       {showInput && onSendMessage && (
-        <div className="border-t bg-background p-4">
+        <div className="border-t bg-background p-2 sm:p-4 flex-shrink-0">
           <div className="flex gap-2">
             <Textarea
               placeholder="Continue the conversation... Ask follow-up questions or request more help! 💬"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="min-h-[80px] max-h-[120px] resize-none placeholder:text-xs md:placeholder:text-md"
+              className="min-h-[80px] sm:min-h-[120px] max-h-[100px] sm:max-h-[120px] resize-none placeholder:text-xs sm:placeholder:text-sm text-sm"
               disabled={isStreaming}
             />
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isStreaming}
               size="sm"
-              className="self-end"
+              className="self-end flex-shrink-0 h-10 w-10 sm:h-auto sm:w-auto sm:px-3"
             >
               <Send className="h-4 w-4" />
+              <span className="hidden sm:inline ml-2">Send</span>
             </Button>
           </div>
           {isStreaming && (
@@ -404,24 +416,36 @@ function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.type === "user";
 
   return (
-    <div className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}>
+    <div
+      className={cn(
+        "flex gap-2 sm:gap-3",
+        isUser ? "justify-end" : "justify-start"
+      )}
+    >
       {!isUser && (
-        <div className="flex h-4 w-4 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Bot className="h-4 w-4" />
+        <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
         </div>
       )}
 
       <Card
         className={cn(
-          "max-w-[80%] px-4 py-3",
+          "max-w-[85%] sm:max-w-[80%] px-3 py-2 sm:px-4 sm:py-3 break-words",
           isUser ? "bg-primary text-primary-foreground" : "bg-muted"
         )}
       >
         {isUser ? (
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          <p className="text-xs sm:text-sm whitespace-pre-wrap break-words">
+            {message.content}
+          </p>
         ) : (
-          <Suspense fallback={<div className="text-sm">Loading...</div>}>
-            <MarkdownMessage content={message.content} className="text-sm" />
+          <Suspense
+            fallback={<div className="text-xs sm:text-sm">Loading...</div>}
+          >
+            <MarkdownMessage
+              content={message.content}
+              className="text-xs sm:text-sm"
+            />
           </Suspense>
         )}
         <p
@@ -438,10 +462,10 @@ function ChatMessage({ message }: ChatMessageProps) {
       </Card>
 
       {isUser && (
-        <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-muted">
-          <Avatar>
+        <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 select-none items-center justify-center rounded-full bg-muted">
+          <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
             <AvatarImage src={user?.imageUrl} />
-            <AvatarFallback>
+            <AvatarFallback className="text-xs">
               {user?.firstName?.charAt(0)}
               {user?.lastName?.charAt(0)}
             </AvatarFallback>

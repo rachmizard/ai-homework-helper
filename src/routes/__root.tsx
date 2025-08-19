@@ -61,6 +61,28 @@ export const Route = createRootRoute({
         src: "/customScript.js",
         type: "text/javascript",
       },
+      {
+        children: `
+          (function() {
+            try {
+              const storageKey = 'homework-helper-theme';
+              const theme = localStorage.getItem(storageKey) || 'dark';
+              const root = document.documentElement;
+              
+              if (theme === 'system') {
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                root.classList.add(systemTheme);
+              } else {
+                root.classList.add(theme);
+              }
+            } catch (e) {
+              // Fallback to dark theme if there's an error
+              document.documentElement.classList.add('dark');
+            }
+          })();
+        `,
+        type: "text/javascript",
+      },
     ],
   }),
   errorComponent: DefaultCatchBoundary,
@@ -73,7 +95,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <ClerkProvider>
       <QueryProvider>
         <ThemeProvider defaultTheme="dark" storageKey="homework-helper-theme">
-          <html>
+          <html suppressHydrationWarning>
             <head>
               <HeadContent />
             </head>

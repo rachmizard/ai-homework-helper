@@ -118,7 +118,7 @@ export function MarkdownMessage({ content, className }: MarkdownMessageProps) {
           pre: ({ children, ...props }) => (
             <pre
               {...props}
-              className="bg-muted rounded-lg p-4 overflow-x-auto my-4"
+              className="bg-muted rounded-lg overflow-x-auto my-4"
             >
               {children}
             </pre>
@@ -127,7 +127,7 @@ export function MarkdownMessage({ content, className }: MarkdownMessageProps) {
             <div className="my-4 overflow-x-auto">
               <table
                 {...props}
-                className="min-w-full border-collapse border border-border"
+                className="min-w-full border-collapse border border-border rounded-lg overflow-hidden"
               >
                 {children}
               </table>
@@ -142,14 +142,14 @@ export function MarkdownMessage({ content, className }: MarkdownMessageProps) {
             <tbody {...props}>{children}</tbody>
           ),
           tr: ({ children, ...props }) => (
-            <tr {...props} className="border-b border-border">
+            <tr {...props} className="border-b border-border last:border-b-0">
               {children}
             </tr>
           ),
           th: ({ children, ...props }) => (
             <th
               {...props}
-              className="border border-border px-4 py-2 text-left font-semibold text-foreground"
+              className="border border-border px-4 py-2 text-left font-semibold text-foreground first:rounded-tl-lg last:rounded-tr-lg"
             >
               {children}
             </th>
@@ -157,7 +157,7 @@ export function MarkdownMessage({ content, className }: MarkdownMessageProps) {
           td: ({ children, ...props }) => (
             <td
               {...props}
-              className="border border-border px-4 py-2 text-foreground"
+              className="border border-border px-4 py-2 text-foreground last:border-r-0 first:border-l-0"
             >
               {children}
             </td>
