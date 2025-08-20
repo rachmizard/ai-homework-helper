@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 import AnimatedContent from "./animations/AnimatedContent/AnimatedContent";
 import { InputMethodEnum, ModeEnum } from "~/db";
+import { dateFormatter } from "~/lib/date-formatter";
 
 export type MessageType = "user" | "assistant";
 
@@ -386,10 +387,10 @@ export default function ChatInterface({
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isStreaming}
               size="sm"
-              className="self-end flex-shrink-0 h-10 w-10 sm:h-auto sm:w-auto sm:px-3"
+              className="self-end flex-shrink-0  sm:px-3"
             >
               <Send className="h-4 w-4" />
-              <span className="hidden sm:inline ml-2">Send</span>
+              <span className="hidden sm:inline">Send</span>
             </Button>
           </div>
           {isStreaming && (
@@ -455,10 +456,7 @@ function ChatMessage({ message }: ChatMessageProps) {
             isUser ? "text-primary-foreground/70" : "text-muted-foreground"
           )}
         >
-          {message.timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {dateFormatter(message?.timestamp).format("HH:mm")}
         </p>
       </Card>
 
