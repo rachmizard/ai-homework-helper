@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import {
   Brain,
   CheckCircle2,
@@ -63,13 +62,9 @@ const Aurora = React.lazy(
 // Lazy load the chat interface component
 const ChatInterface = React.lazy(() => import("~/components/chat-interface"));
 
-export const Route = createFileRoute("/_authenticatedLayout/homework-helper")({
-  component: HomeworkHelper,
-});
-
 type Mode = ModeEnum;
 
-function HomeworkHelper() {
+export function AuthedHomeworkHelper() {
   const user = useUser();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [textInput, setTextInput] = React.useState("");

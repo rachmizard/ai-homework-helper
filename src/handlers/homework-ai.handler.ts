@@ -19,7 +19,6 @@ export const extractTextFromImageSchema = z.object({
 });
 
 export const generateChatSchema = z.object({
-  question: z.string().min(1, "Question is required"),
   language: z.enum(["en", "id", "de", "es", "fr"]),
   extractedText: z.string().optional(),
   messages: z
@@ -192,8 +191,7 @@ export const generateChatStream = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data }) => {
     try {
-      const { question, extractedText, messages } = data;
-      const inputText = extractedText || question;
+      const { messages } = data;
 
       // Build messages array with conversation history
       const conversationMessages: Array<{
@@ -210,12 +208,6 @@ export const generateChatStream = createServerFn({ method: "POST" })
       if (messages && messages.length > 0) {
         conversationMessages.push(...messages);
       }
-
-      // Add the current user message
-      conversationMessages.push({
-        role: "user",
-        content: inputText,
-      });
 
       const stream = await createStreamingChatCompletion({
         ...CHAT_CONFIGS.CREATIVE,
